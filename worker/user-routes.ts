@@ -2,8 +2,27 @@ import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { CustomerEntity, BookingEntity, SubscriptionEntity } from "./entities";
 import { ok, bad } from './core-utils';
+import { addDays, format } from 'date-fns';
+
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/test', (c) => c.json({ success: true, data: { name: 'DetailFlow OS API' }}));
+  
+  // AUTH
+  app.post('/api/auth/login', async (c) => {
+    const { role } = await c.req.json();
+    return ok(c, { id: crypto.randomUUID(), name: 'User Name', role, email: 'user@example.com' });
+  });
+
+  // WEATHER
+  app.get('/api/weather', (c) => {
+    const forecasts = Array.from({ length: 30 }).map((_, i) => ({
+      date: format(addDays(new Date(), i), 'yyyy-MM-dd'),
+      condition: i % 4 === 0 ? 'Rainy' : 'Sunny',
+      temp: Math.floor(Math.random() * (85 - 65) + 65)
+    }));
+    return ok(c, forecasts);
+  });
+
   // STATS / ANALYTICS
   app.get('/api/stats', async (c) => {
     const bookings = await BookingEntity.list(c.env);
@@ -17,7 +36,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       activeJobs: bookings.items.filter(b => b.status === 'pending' || b.status === 'confirmed').length,
       customerCount: customers.items.length,
       subscriptionCount: subs.items.filter(s => s.status === 'active').length,
-      satisfactionScore: 4.9
+      satisfactionScore: 4.9,
+      weatherForecast: {
+        condition: 'Partly Cloudy',
+        riskLevel: 'Low'
+      }
     });
   });
   // CUSTOMERS
