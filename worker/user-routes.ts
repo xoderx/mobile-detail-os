@@ -26,4 +26,12 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     });
     return ok(c, booking);
   });
+
+  app.patch('/api/bookings/:id/status', async (c) => {
+    const id = c.req.param('id');
+    const { status } = (await c.req.json()) as { status: string };
+    const entity = new BookingEntity(c.env, id);
+    await entity.patch({ status: status as any });
+    return ok(c, { id, status });
+  });
 }

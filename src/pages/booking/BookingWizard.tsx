@@ -15,6 +15,7 @@ export function BookingWizard() {
   const vehicleSize = useBookingStore(s => s.vehicleSize);
   const packageId = useBookingStore(s => s.packageId);
   const dateTime = useBookingStore(s => s.dateTime);
+  const getTotalPrice = useBookingStore(s => s.getTotalPrice);
   const progress = (step / 5) * 100;
   const steps = [
     { id: 1, name: 'Vehicle', icon: Car },
@@ -131,7 +132,7 @@ export function BookingWizard() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center">
                     <span className="font-bold">Estimated Total</span>
-                    <span className="text-xl font-bold text-brand-600">$0.00</span>
+                    <span className="text-xl font-bold text-brand-600">${getTotalPrice().toFixed(2)}</span>
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-2">Final price confirmed upon arrival.</p>
                 </div>
