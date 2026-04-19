@@ -9,6 +9,7 @@ export interface User {
   email: string;
   role: 'admin' | 'tech' | 'customer';
 }
+export type VehicleSize = 'sedan' | 'suv' | 'truck' | 'luxury';
 export interface ServiceTier {
   id: string;
   name: string;
