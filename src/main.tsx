@@ -16,6 +16,8 @@ import { BookingWizard } from '@/pages/booking/BookingWizard'
 import { Dashboard } from '@/pages/admin/Dashboard'
 import Customers from '@/pages/admin/Customers'
 import Schedule from '@/pages/admin/Schedule'
+import Subscriptions from '@/pages/admin/Subscriptions'
+import Settings from '@/pages/admin/Settings'
 import JobQueue from '@/pages/tech/JobQueue'
 import { AppLayout } from '@/components/layout/AppLayout'
 const queryClient = new QueryClient();
@@ -53,6 +55,24 @@ const router = createBrowserRouter([
     element: (
       <AppLayout container>
         <Schedule />
+      </AppLayout>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin/subs",
+    element: (
+      <AppLayout>
+        <Subscriptions />
+      </AppLayout>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin/settings",
+    element: (
+      <AppLayout container>
+        <Settings />
       </AppLayout>
     ),
     errorElement: <RouteErrorBoundary />,

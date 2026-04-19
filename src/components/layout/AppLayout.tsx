@@ -1,12 +1,13 @@
 import React from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { 
-  Home, 
-  Calendar, 
-  Users, 
-  Settings, 
+import {
+  Home,
+  Calendar,
+  Users,
+  Settings,
   CreditCard,
-  LogOut
+  LogOut,
+  LayoutDashboard
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,7 +24,7 @@ import { cn } from "@/lib/utils";
 function AppSidebar() {
   const location = useLocation();
   const navItems = [
-    { label: "Dashboard", icon: Home, path: "/admin" },
+    { label: "Dashboard", icon: LayoutDashboard, path: "/admin" },
     { label: "Schedule", icon: Calendar, path: "/admin/schedule" },
     { label: "Customers", icon: Users, path: "/admin/customers" },
     { label: "Subscriptions", icon: CreditCard, path: "/admin/subs" },
@@ -73,18 +74,20 @@ export function AppLayout({ children, container = false }: AppLayoutProps): JSX.
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />
-      <SidebarInset>
-        <div className="flex h-16 items-center border-b px-4 md:px-6">
+      <SidebarInset className="bg-slate-50/50">
+        <div className="flex h-16 items-center border-b px-4 md:px-6 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
           <SidebarTrigger />
           <div className="ml-4 h-4 w-px bg-border" />
           <h1 className="ml-4 text-sm font-medium text-muted-foreground">Admin Portal</h1>
         </div>
         {container ? (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
             {children}
           </div>
         ) : (
-          children
+          <div className="w-full">
+            {children}
+          </div>
         )}
       </SidebarInset>
     </SidebarProvider>
