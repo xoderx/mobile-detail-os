@@ -80,7 +80,8 @@ function runSetupCommands() {
     const commands = [
     "bun add stripe@^17.2.0",
     "bun add @stripe/stripe-js@^4.3.0",
-    "bun add @stripe/react-stripe-js@^2.7.3"
+    "bun add @stripe/react-stripe-js@^2.7.3",
+    "bun add @stripe/stripe-js @stripe/react-stripe-js stripe"
 ];
     
     if (commands.length === 0) {
