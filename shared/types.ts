@@ -3,22 +3,49 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
-
-// Minimal real-world chat example types (shared by frontend and worker)
 export interface User {
   id: string;
   name: string;
+  email: string;
+  role: 'admin' | 'tech' | 'customer';
 }
-
+export interface ServiceTier {
+  id: string;
+  name: string;
+  price: number;
+  features: string[];
+  isPopular: boolean;
+}
+export interface AddOn {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+}
+export interface AppConfig {
+  id: string;
+  siteTitle: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  aboutText: string;
+  integrations: {
+    stripe: boolean;
+    twilio: boolean;
+    googleMaps: boolean;
+  };
+  keys: {
+    stripePublicKey: string;
+    twilioSid: string;
+  };
+}
 export interface Chat {
   id: string;
   title: string;
 }
-
 export interface ChatMessage {
   id: string;
   chatId: string;
   userId: string;
   text: string;
-  ts: number; // epoch millis
+  ts: number;
 }

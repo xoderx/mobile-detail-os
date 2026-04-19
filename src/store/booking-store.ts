@@ -1,32 +1,13 @@
 import { create } from 'zustand';
-export type VehicleSize = 'sedan' | 'suv' | 'truck' | 'luxury';
-export const PRICING = {
-  VEHICLE: {
-    sedan: 0,
-    suv: 20,
-    truck: 40,
-    luxury: 60
-  },
-  PACKAGES: {
-    basic: 89,
-    premium: 149,
-    ceramic: 299
-  },
-  ADD_ONS: {
-    engine: 49,
-    pet: 30,
-    headlight: 60,
-    odor: 25,
-    'ceramic-boost': 40,
-    'clay-bar': 50
-  }
-};
+import type { ServiceTier, AddOn, VehicleSize } from '@shared/types';
 export interface BookingState {
   step: number;
-  vehicleSize: VehicleSize | null;
+  vehicleSize: string | null;
   packageId: string | null;
   addOns: string[];
   dateTime: string | null;
+  availableTiers: ServiceTier[];
+  availableAddOns: AddOn[];
   contact: {
     firstName: string;
     lastName: string;
@@ -35,11 +16,12 @@ export interface BookingState {
     address: string;
   };
   setStep: (step: number) => void;
-  setVehicleSize: (size: VehicleSize) => void;
+  setVehicleSize: (size: string) => void;
   setPackageId: (id: string) => void;
   toggleAddOn: (id: string) => void;
   setDateTime: (dateTime: string) => void;
   setContact: (contact: Partial<BookingState['contact']>) => void;
+  setCatalog: (tiers: ServiceTier[], addons: AddOn[]) => void;
   getTotalPrice: () => number;
   reset: () => void;
 }
@@ -50,12 +32,20 @@ const initialContact = {
   phone: '',
   address: '',
 };
+const VEHICLE_PREMIUMS: Record<string, number> = {
+  sedan: 0,
+  suv: 20,
+  truck: 40,
+  luxury: 60
+};
 export const useBookingStore = create<BookingState>((set, get) => ({
   step: 1,
   vehicleSize: null,
   packageId: null,
   addOns: [],
   dateTime: null,
+  availableTiers: [],
+  availableAddOns: [],
   contact: initialContact,
   setStep: (step) => set({ step }),
   setVehicleSize: (vehicleSize) => set({ vehicleSize, step: 2 }),
@@ -69,18 +59,21 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   setContact: (contact) => set((state) => ({
     contact: { ...state.contact, ...contact }
   })),
+  setCatalog: (availableTiers, availableAddOns) => set({ availableTiers, availableAddOns }),
   getTotalPrice: () => {
-    const { vehicleSize, packageId, addOns } = get();
+    const { vehicleSize, packageId, addOns, availableTiers, availableAddOns } = get();
     let total = 0;
-    if (packageId && packageId in PRICING.PACKAGES) {
-      total += PRICING.PACKAGES[packageId as keyof typeof PRICING.PACKAGES];
+    const selectedTier = availableTiers.find(t => t.id === packageId);
+    if (selectedTier) {
+      total += selectedTier.price;
     }
-    if (vehicleSize && vehicleSize in PRICING.VEHICLE) {
-      total += PRICING.VEHICLE[vehicleSize];
+    if (vehicleSize && vehicleSize in VEHICLE_PREMIUMS) {
+      total += VEHICLE_PREMIUMS[vehicleSize];
     }
     addOns.forEach(id => {
-      if (id in PRICING.ADD_ONS) {
-        total += PRICING.ADD_ONS[id as keyof typeof PRICING.ADD_ONS];
+      const addon = availableAddOns.find(a => a.id === id);
+      if (addon) {
+        total += addon.price;
       }
     });
     return total;

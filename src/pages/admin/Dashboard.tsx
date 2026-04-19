@@ -2,10 +2,10 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { DollarSign, Briefcase, Users as UsersIcon, ArrowUpRight, Star, TrendingUp } from 'lucide-react';
+import { DollarSign, Users as UsersIcon, ArrowUpRight, Star, TrendingUp, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 const chartData = [
   { name: 'Mon', revenue: 400 },
   { name: 'Tue', revenue: 600 },
@@ -20,11 +20,7 @@ export function Dashboard() {
     queryKey: ['stats'],
     queryFn: () => api<any>('/api/stats'),
   });
-  const { data: bookingsData } = useQuery({
-    queryKey: ['bookings'],
-    queryFn: () => api<{ items: any[] }>('/api/bookings'),
-  });
-  const bookings = bookingsData?.items ?? [];
+  const integrations = stats?.integrations ?? { stripe: false, twilio: false, googleMaps: false };
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -34,7 +30,7 @@ export function Dashboard() {
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="h-8 px-4 text-brand-600 border-brand-200 bg-brand-50">Operational</Badge>
-          <Badge variant="outline" className="h-8 px-4">Live Data</Badge>
+          <Badge variant="outline" className="h-8 px-4">Phase 8 Live</Badge>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -57,27 +53,27 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${stats?.mrr?.toLocaleString() ?? '0.00'}</div>
-            <p className="text-xs text-muted-foreground mt-1">Recurring Subscription Revenue</p>
+            <p className="text-xs text-muted-foreground mt-1">Recurring Subscriptions</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Customers</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Members</CardTitle>
             <UsersIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.customerCount ?? '0'}</div>
-            <p className="text-xs text-muted-foreground mt-1">Unique client records</p>
+            <div className="text-2xl font-bold">{stats?.subscriptionCount ?? '0'}</div>
+            <p className="text-xs text-muted-foreground mt-1">Subscribed clients</p>
           </CardContent>
         </Card>
-        <Card className="bg-brand-500 text-white shadow-brand">
+        <Card className="bg-brand-500 text-white border-none shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Satisfaction Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Customer Sentiment</CardTitle>
             <Star className="h-4 w-4 text-brand-100" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.satisfactionScore ?? '4.9'}/5.0</div>
-            <p className="text-xs text-brand-100 mt-1">Verified customer reviews</p>
+            <p className="text-xs text-brand-100 mt-1">Verified reviews</p>
           </CardContent>
         </Card>
       </div>
@@ -98,36 +94,50 @@ export function Dashboard() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Technician Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-             <div className="space-y-6">
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">1</div>
-                   <div className="text-sm font-medium">Tech #1 (Senior)</div>
-                 </div>
-                 <Badge variant="secondary">14 Jobs</Badge>
-               </div>
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">2</div>
-                   <div className="text-sm font-medium">Tech #2 (Lead)</div>
-                 </div>
-                 <Badge variant="secondary">9 Jobs</Badge>
-               </div>
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">3</div>
-                   <div className="text-sm font-medium">Tech #3 (Junior)</div>
-                 </div>
-                 <Badge variant="secondary">4 Jobs</Badge>
-               </div>
-             </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Connectivity Status</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-medium">
+                  <ShieldCheck className={`h-4 w-4 ${integrations.stripe ? 'text-emerald-500' : 'text-slate-300'}`} />
+                  Stripe Gateway
+                </div>
+                <Badge variant={integrations.stripe ? 'secondary' : 'outline'} className="text-[10px]">
+                  {integrations.stripe ? 'ACTIVE' : 'OFFLINE'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-medium">
+                  <Zap className={`h-4 w-4 ${integrations.twilio ? 'text-amber-500' : 'text-slate-300'}`} />
+                  Twilio Notifications
+                </div>
+                <Badge variant={integrations.twilio ? 'secondary' : 'outline'} className="text-[10px]">
+                  {integrations.twilio ? 'ACTIVE' : 'DISABLED'}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground pt-2 border-t mt-4">
+                <AlertCircle className="h-3 w-3" />
+                <Link to="/admin/settings" className="hover:underline text-brand-600">Configure integrations in Settings</Link>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 gap-2">
+              <Button variant="outline" size="sm" className="justify-start" asChild>
+                <Link to="/admin/schedule">Check Today's Route</Link>
+              </Button>
+              <Button variant="outline" size="sm" className="justify-start" asChild>
+                <Link to="/admin/customers">View Recent Leads</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api-client';
 import { useBookingStore } from '@/store/booking-store';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Car, Package, PlusCircle, Calendar as CalendarIcon, User, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Car, Package, PlusCircle, Calendar as CalendarIcon, User, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { PackageSelection } from '@/components/booking/PackageSelection';
@@ -16,6 +18,20 @@ export function BookingWizard() {
   const packageId = useBookingStore(s => s.packageId);
   const dateTime = useBookingStore(s => s.dateTime);
   const getTotalPrice = useBookingStore(s => s.getTotalPrice);
+  const setCatalog = useBookingStore(s => s.setCatalog);
+  const { data: tiers, isLoading: tiersLoading } = useQuery({
+    queryKey: ['cms-services'],
+    queryFn: () => api<{ items: any[] }>('/api/cms/services'),
+  });
+  const { data: addons, isLoading: addonsLoading } = useQuery({
+    queryKey: ['cms-addons'],
+    queryFn: () => api<{ items: any[] }>('/api/cms/addons'),
+  });
+  useEffect(() => {
+    if (tiers?.items && addons?.items) {
+      setCatalog(tiers.items, addons.items);
+    }
+  }, [tiers, addons, setCatalog]);
   const progress = (step / 5) * 100;
   const steps = [
     { id: 1, name: 'Vehicle', icon: Car },
@@ -24,6 +40,16 @@ export function BookingWizard() {
     { id: 4, name: 'Schedule', icon: CalendarIcon },
     { id: 5, name: 'Details', icon: User },
   ];
+  if (tiersLoading || addonsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-brand-600 mx-auto" />
+          <p className="text-sm font-bold text-muted-foreground">Initializing Booking Engine...</p>
+        </div>
+      </div>
+    );
+  }
   if (step === 6) return <SuccessStep />;
   return (
     <div className="min-h-screen bg-muted/30">
@@ -40,9 +66,9 @@ export function BookingWizard() {
           <Progress value={progress} className="h-2 bg-white" />
           <div className="mt-6 hidden sm:flex justify-between">
             {steps.map((s) => (
-              <div key={s.id} className={`flex flex-col items-center gap-2 transition-colors duration-300 ${step >= s.id ? 'text-brand-600' : 'text-muted-foreground'}`}>
-                <div className={`h-10 w-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${step >= s.id ? 'bg-brand-50 border-brand-500 scale-110 shadow-sm' : 'bg-background border-border'}`}>
-                  <s.icon className={`h-5 w-5 ${step >= s.id ? 'text-brand-600' : 'text-muted-foreground'}`} />
+              <div key={s.id} className={`flex flex-col items-center gap-2 ${step >= s.id ? 'text-brand-600' : 'text-muted-foreground'}`}>
+                <div className={`h-10 w-10 rounded-full border-2 flex items-center justify-center transition-all ${step >= s.id ? 'bg-brand-50 border-brand-500 shadow-sm' : 'bg-background border-border'}`}>
+                  <s.icon className="h-5 w-5" />
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-widest">{s.name}</span>
               </div>
@@ -54,13 +80,7 @@ export function BookingWizard() {
             <div className="bg-background rounded-2xl border shadow-sm p-6 md:p-10 min-h-[500px] overflow-hidden">
               <AnimatePresence mode="wait">
                 {step === 1 && (
-                  <motion.div
-                    key="step1"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="space-y-6"
-                  >
+                  <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                     <div className="text-center mb-10">
                       <h2 className="text-3xl font-bold tracking-tight">Select Vehicle Size</h2>
                       <p className="text-muted-foreground mt-2">Accurate pricing begins with your vehicle category.</p>
@@ -74,8 +94,8 @@ export function BookingWizard() {
                       ].map((item) => (
                         <button
                           key={item.id}
-                          onClick={() => useBookingStore.getState().setVehicleSize(item.id as any)}
-                          className={`p-6 rounded-xl border-2 text-left transition-all group relative overflow-hidden ${vehicleSize === item.id ? 'border-brand-500 bg-brand-50/30 shadow-md ring-1 ring-brand-500' : 'border-border hover:border-brand-200 hover:bg-muted/50'}`}
+                          onClick={() => useBookingStore.getState().setVehicleSize(item.id)}
+                          className={`p-6 rounded-xl border-2 text-left transition-all relative ${vehicleSize === item.id ? 'border-brand-500 bg-brand-50/30 shadow-md ring-1 ring-brand-500' : 'border-border hover:border-brand-200'}`}
                         >
                           <div className="text-3xl mb-4">{item.icon}</div>
                           <h3 className="font-bold text-lg mb-1">{item.label}</h3>
@@ -139,8 +159,8 @@ export function BookingWizard() {
               </div>
             </div>
             <div className="bg-brand-600 rounded-2xl p-6 text-white shadow-lg">
-              <h4 className="font-bold mb-2">Need help?</h4>
-              <p className="text-sm text-brand-100 mb-4">Give us a call or text for custom quotes and specialized services.</p>
+              <h4 className="font-bold mb-2">Support Assistance</h4>
+              <p className="text-sm text-brand-100 mb-4">Text us for custom quotes or exotic vehicle inquiries.</p>
               <Button variant="secondary" className="w-full text-brand-600 font-bold">
                 (555) 123-4567
               </Button>
