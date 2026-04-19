@@ -14,6 +14,7 @@ import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import { BookingWizard } from '@/pages/booking/BookingWizard'
 import { Dashboard } from '@/pages/admin/Dashboard'
+import Customers from '@/pages/admin/Customers'
 import { AppLayout } from '@/components/layout/AppLayout'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -32,6 +33,15 @@ const router = createBrowserRouter([
     element: (
       <AppLayout container>
         <Dashboard />
+      </AppLayout>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin/customers",
+    element: (
+      <AppLayout>
+        <Customers />
       </AppLayout>
     ),
     errorElement: <RouteErrorBoundary />,
