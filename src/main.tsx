@@ -21,6 +21,8 @@ import Schedule from '@/pages/admin/Schedule'
 import Subscriptions from '@/pages/admin/Subscriptions'
 import Settings from '@/pages/admin/Settings'
 import JobQueue from '@/pages/tech/JobQueue'
+import JobDetails from '@/pages/tech/JobDetails'
+import MyBookings from '@/pages/customer/MyBookings'
 import { AppLayout } from '@/components/layout/AppLayout'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -40,6 +42,15 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
   },
   {
+    path: "/my-bookings",
+    element: (
+      <AuthGuard allowedRoles={["customer", "admin"]}>
+        <MyBookings />
+      </AuthGuard>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
     path: "/admin",
     element: (
       <AuthGuard allowedRoles={["admin"]}>
@@ -54,7 +65,7 @@ const router = createBrowserRouter([
     path: "/admin/customers",
     element: (
       <AuthGuard allowedRoles={["admin"]}>
-        <AppLayout>
+        <AppLayout container>
           <Customers />
         </AppLayout>
       </AuthGuard>
@@ -76,7 +87,7 @@ const router = createBrowserRouter([
     path: "/admin/subs",
     element: (
       <AuthGuard allowedRoles={["admin"]}>
-        <AppLayout>
+        <AppLayout container>
           <Subscriptions />
         </AppLayout>
       </AuthGuard>
@@ -99,6 +110,15 @@ const router = createBrowserRouter([
     element: (
       <AuthGuard allowedRoles={["tech"]}>
         <JobQueue />
+      </AuthGuard>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/tech/jobs/:id",
+    element: (
+      <AuthGuard allowedRoles={["tech"]}>
+        <JobDetails />
       </AuthGuard>
     ),
     errorElement: <RouteErrorBoundary />,
