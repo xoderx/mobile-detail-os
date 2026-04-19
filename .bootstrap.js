@@ -77,7 +77,11 @@ function updateWranglerJsonc() {
 }
 
 function runSetupCommands() {
-    const commands = [];
+    const commands = [
+    "bun add stripe@^17.2.0",
+    "bun add @stripe/stripe-js@^4.3.0",
+    "bun add @stripe/react-stripe-js@^2.7.3"
+];
     
     if (commands.length === 0) {
         console.log('⊘ No setup commands to run');
