@@ -6,7 +6,7 @@ import { useBookingStore } from '@/store/booking-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, Loader2, Lock } from 'lucide-react';
+import { ChevronLeft, Loader2, Lock, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api-client';
 const contactSchema = z.object({
   firstName: z.string().min(2, 'First name is required'),
@@ -20,11 +20,11 @@ export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const setStep = useBookingStore(s => s.setStep);
   const setContact = useBookingStore(s => s.setContact);
-  // Get current state for submission
   const vehicleSize = useBookingStore(s => s.vehicleSize);
   const packageId = useBookingStore(s => s.packageId);
   const addOns = useBookingStore(s => s.addOns);
   const dateTime = useBookingStore(s => s.dateTime);
+  const totalPrice = useBookingStore(s => s.getTotalPrice)();
   const { register, handleSubmit, formState: { errors } } = useForm<ContactValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: useBookingStore.getState().contact
@@ -33,23 +33,25 @@ export function ContactForm() {
     setIsSubmitting(true);
     try {
       setContact(data);
-      // Simulate real submission
+      // Simulating Payment Processing Redirect / Session Creation
+      await api('/api/payments/create-session', { method: 'POST' });
+      // Simulate Stripe verification lag
+      await new Promise(r => setTimeout(r, 2000));
       await api('/api/bookings', {
         method: 'POST',
         body: JSON.stringify({
-          customerId: 'c1', // Mocked for now
+          customerId: 'c1', 
           vehicleSize,
           packageId,
           addOns,
           dateTime,
-          contact: data
+          contact: data,
+          totalPrice
         })
       });
-      // Move to success step (6)
       setStep(6);
     } catch (error) {
       console.error('Submission failed', error);
-      // In a real app we would show a toast error
     } finally {
       setIsSubmitting(false);
     }
@@ -62,54 +64,64 @@ export function ContactForm() {
         </Button>
       </div>
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Your Information</h2>
-        <p className="text-muted-foreground mt-2">Where and who should we look for?</p>
+        <h2 className="text-3xl font-bold tracking-tight">Final Step</h2>
+        <p className="text-muted-foreground mt-2">Secure your slot with a small deposit.</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name</Label>
             <Input id="firstName" placeholder="John" {...register('firstName')} className={errors.firstName ? 'border-destructive' : ''} />
-            {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="lastName">Last Name</Label>
             <Input id="lastName" placeholder="Doe" {...register('lastName')} className={errors.lastName ? 'border-destructive' : ''} />
-            {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
           </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" type="email" placeholder="john@example.com" {...register('email')} className={errors.email ? 'border-destructive' : ''} />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input id="phone" type="tel" placeholder="(555) 000-0000" {...register('phone')} className={errors.phone ? 'border-destructive' : ''} />
-          {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
+          <Input id="email" type="email" placeholder="john@example.com" {...register('email')} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="address">Service Address</Label>
-          <Input id="address" placeholder="123 Detail St, Clean City, ST 12345" {...register('address')} className={errors.address ? 'border-destructive' : ''} />
-          {errors.address && <p className="text-xs text-destructive">{errors.address.message}</p>}
+          <Input id="address" placeholder="123 Detail St, Clean City, ST 12345" {...register('address')} />
+        </div>
+        <div className="mt-8 p-6 bg-brand-50 rounded-2xl border border-brand-100 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-brand-600" />
+              <span className="font-bold text-sm">Payment Summary</span>
+            </div>
+            <Badge className="bg-brand-500">Stripe Secure</Badge>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Service Total</span>
+              <span className="font-medium">${totalPrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-brand-700 font-bold border-t pt-2">
+              <span>Refundable Deposit Due Now</span>
+              <span>$20.00</span>
+            </div>
+          </div>
         </div>
         <div className="pt-6 border-t flex flex-col gap-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
-            <Lock className="h-3 w-3" /> Secure booking. No payment taken now.
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center">
+            <Lock className="h-3 w-3" /> Encrypted via Stripe. We never store your card details.
           </div>
-          <Button 
-            type="submit" 
-            size="lg" 
+          <Button
+            type="submit"
+            size="lg"
             disabled={isSubmitting}
-            className="w-full bg-brand-600 hover:bg-brand-700 h-14 text-lg font-bold"
+            className="w-full bg-brand-600 hover:bg-brand-700 h-14 text-lg font-bold shadow-lg"
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Processing Booking...
+                Processing Payment...
               </>
             ) : (
-              'Complete Booking'
+              'Pay Deposit & Book Now'
             )}
           </Button>
         </div>
