@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,24 +10,17 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
-  Building2, CreditCard, Users, Bell, Globe,
-  Settings2, Package, Plus, Trash2, ShieldCheck,
-  Smartphone, Download, Loader2
+  Globe, Settings2, Package, Plus, Trash2, 
+  Download, Loader2, Sparkles, MessageSquare, 
+  Palette, Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 export default function Settings() {
   const queryClient = useQueryClient();
+  const [previewScale, setPreviewScale] = useState(1);
   const { data: config, isLoading: configLoading } = useQuery({
     queryKey: ['config'],
     queryFn: () => api<any>('/api/cms/config'),
-  });
-  const { data: services, isLoading: servicesLoading } = useQuery({
-    queryKey: ['cms-services'],
-    queryFn: () => api<{ items: any[] }>('/api/cms/services'),
-  });
-  const { data: addons, isLoading: addonsLoading } = useQuery({
-    queryKey: ['cms-addons'],
-    queryFn: () => api<{ items: any[] }>('/api/cms/addons'),
   });
   const updateConfig = useMutation({
     mutationFn: (data: any) => api('/api/cms/config', { method: 'PATCH', body: JSON.stringify(data) }),
@@ -36,217 +29,208 @@ export default function Settings() {
       toast.success('Configuration updated');
     }
   });
-  const exportConfig = () => {
-    const envVars = `
-SITE_TITLE="${config?.siteTitle}"
-HERO_TITLE="${config?.heroTitle}"
-STRIPE_PUBLIC_KEY="${config?.keys?.stripePublicKey}"
-TWILIO_SID="${config?.keys?.twilioSid}"
-    `.trim();
-    const blob = new Blob([envVars], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'detailflow.env';
-    a.click();
+  const handleListItemUpdate = (field: 'features' | 'testimonials', id: string, data: any) => {
+    const newList = config[field].map((item: any) => item.id === id ? { ...item, ...data } : item);
+    updateConfig.mutate({ [field]: newList });
   };
-  if (configLoading || servicesLoading || addonsLoading) return <div className="p-12 text-center flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin h-8 w-8 text-brand-500" /></div>;
+  const handleListItemDelete = (field: 'features' | 'testimonials', id: string) => {
+    const newList = config[field].filter((item: any) => item.id !== id);
+    updateConfig.mutate({ [field]: newList });
+  };
+  const handleListItemAdd = (field: 'features' | 'testimonials', defaultItem: any) => {
+    const newList = [...(config[field] || []), { ...defaultItem, id: crypto.randomUUID() }];
+    updateConfig.mutate({ [field]: newList });
+  };
+  if (configLoading) return <div className="p-12 text-center flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin h-8 w-8 text-brand-500" /></div>;
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pb-20">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">System Configuration</h1>
-          <p className="text-muted-foreground">Manage service tiers, pricing, and integrations.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Business Command Center</h1>
+          <p className="text-muted-foreground">Manage your brand, content, and system logic.</p>
         </div>
-        <Button variant="outline" onClick={exportConfig}>
-          <Download className="h-4 w-4 mr-2" /> Export ENV
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setPreviewScale(prev => prev === 1 ? 0.7 : 1)}>
+            <Eye className="h-4 w-4 mr-2" /> {previewScale === 1 ? 'Compact Preview' : 'Full Preview'}
+          </Button>
+          <Button variant="default" className="bg-brand-600">
+            Deploy Changes
+          </Button>
+        </div>
       </div>
-      <Tabs defaultValue="cms" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 max-w-3xl mb-8">
-          <TabsTrigger value="cms">CMS</TabsTrigger>
-          <TabsTrigger value="profile">Business</TabsTrigger>
-          <TabsTrigger value="services">Pricing</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="notifications">Alerts</TabsTrigger>
-        </TabsList>
-        <TabsContent value="cms" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            <div className="md:col-span-4 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-7 space-y-8">
+          <Tabs defaultValue="appearance" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-8 bg-muted/50 p-1">
+              <TabsTrigger value="appearance" className="gap-2"><Palette className="h-4 w-4" /> Style</TabsTrigger>
+              <TabsTrigger value="hero" className="gap-2"><Globe className="h-4 w-4" /> Hero</TabsTrigger>
+              <TabsTrigger value="features" className="gap-2"><Sparkles className="h-4 w-4" /> Services</TabsTrigger>
+              <TabsTrigger value="social" className="gap-2"><MessageSquare className="h-4 w-4" /> Social</TabsTrigger>
+            </TabsList>
+            <TabsContent value="appearance" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Integrations</CardTitle>
+                  <CardTitle>Brand Identity</CardTitle>
+                  <CardDescription>Customize the visual personality of DetailFlow.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-xs">Stripe Payments</Label>
-                      <p className="text-[10px] text-muted-foreground">Secure deposits</p>
-                    </div>
-                    <Switch
-                      checked={config?.integrations?.stripe}
-                      onCheckedChange={(v) => updateConfig.mutate({ integrations: { ...config.integrations, stripe: v } })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-xs">Twilio SMS</Label>
-                      <p className="text-[10px] text-muted-foreground">Auto notifications</p>
-                    </div>
-                    <Switch
-                      checked={config?.integrations?.twilio}
-                      onCheckedChange={(v) => updateConfig.mutate({ integrations: { ...config.integrations, twilio: v } })}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="md:col-span-8 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Site Content</CardTitle>
-                  <CardDescription>Control the public-facing copy of your landing page.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Hero Title</Label>
-                    <Input
-                      defaultValue={config?.heroTitle}
-                      onBlur={(e) => updateConfig.mutate({ heroTitle: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Hero Subtitle</Label>
-                    <Textarea
-                      defaultValue={config?.heroSubtitle}
-                      onBlur={(e) => updateConfig.mutate({ heroSubtitle: e.target.value })}
-                    />
-                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Stripe Key Placeholder</Label>
-                      <Input
-                        defaultValue={config?.keys?.stripePublicKey}
-                        onBlur={(e) => updateConfig.mutate({ keys: { ...config.keys, stripePublicKey: e.target.value } })}
-                        placeholder="pk_test_..."
-                      />
+                      <Label>Primary Brand Color</Label>
+                      <div className="flex gap-2">
+                        <Input type="color" className="w-12 h-10 p-1" value={config?.brandTheme?.primaryColor} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, primaryColor: e.target.value } })} />
+                        <Input value={config?.brandTheme?.primaryColor} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, primaryColor: e.target.value } })} />
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Twilio SID Placeholder</Label>
-                      <Input
-                        defaultValue={config?.keys?.twilioSid}
-                        onBlur={(e) => updateConfig.mutate({ keys: { ...config.keys, twilioSid: e.target.value } })}
-                        placeholder="AC..."
-                      />
+                      <Label>Gradient Accent</Label>
+                      <div className="flex gap-2">
+                        <Input type="color" className="w-12 h-10 p-1" value={config?.brandTheme?.gradientStart} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, gradientStart: e.target.value } })} />
+                        <Input value={config?.brandTheme?.gradientStart} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, gradientStart: e.target.value } })} />
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+            <TabsContent value="hero" className="space-y-6">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Service Tiers</CardTitle>
-                    <CardDescription>Configure packages and features.</CardDescription>
-                  </div>
-                  <Button size="sm"><Plus className="h-4 w-4 mr-2" /> Add Tier</Button>
+                <CardHeader>
+                  <CardTitle>Hero Section</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {services?.items?.map((tier: any) => (
-                    <div key={tier.id} className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
-                      <div>
-                        <div className="font-bold flex items-center gap-2">
-                          {tier.name}
-                          {tier.isPopular && <Badge className="text-[9px] h-4">Popular</Badge>}
-                        </div>
-                        <div className="text-xs text-muted-foreground">${tier.price} Base</div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">Edit</Button>
-                        <Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="space-y-2">
+                    <Label>Main Headline</Label>
+                    <Input defaultValue={config?.heroTitle} onBlur={(e) => updateConfig.mutate({ heroTitle: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sub-headline</Label>
+                    <Textarea defaultValue={config?.heroSubtitle} onBlur={(e) => updateConfig.mutate({ heroSubtitle: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Call to Action Button</Label>
+                    <Input defaultValue={config?.ctaText} onBlur={(e) => updateConfig.mutate({ ctaText: e.target.value })} />
+                  </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+            <TabsContent value="features" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold">Feature Grid</h3>
+                <Button size="sm" onClick={() => handleListItemAdd('features', { title: 'New Feature', description: 'Feature description', iconName: 'SprayCan' })}>
+                  <Plus className="h-4 w-4 mr-2" /> Add Feature
+                </Button>
+              </div>
+              {config?.features?.map((item: any) => (
+                <Card key={item.id}>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1 grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Icon Name (Lucide)</Label>
+                          <Input defaultValue={item.iconName} onBlur={(e) => handleListItemUpdate('features', item.id, { iconName: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Title</Label>
+                          <Input defaultValue={item.title} onBlur={(e) => handleListItemUpdate('features', item.id, { title: e.target.value })} />
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleListItemDelete('features', item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea defaultValue={item.description} onBlur={(e) => handleListItemUpdate('features', item.id, { description: e.target.value })} />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </TabsContent>
+            <TabsContent value="social" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold">Client Testimonials</h3>
+                <Button size="sm" onClick={() => handleListItemAdd('testimonials', { author: 'Client Name', role: 'Verified Customer', content: 'Great service!', rating: 5 })}>
+                  <Plus className="h-4 w-4 mr-2" /> Add Review
+                </Button>
+              </div>
+              {config?.testimonials?.map((item: any) => (
+                <Card key={item.id}>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1 grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Author</Label>
+                          <Input defaultValue={item.author} onBlur={(e) => handleListItemUpdate('testimonials', item.id, { author: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Rating (1-5)</Label>
+                          <Input type="number" min="1" max="5" defaultValue={item.rating} onBlur={(e) => handleListItemUpdate('testimonials', item.id, { rating: parseInt(e.target.value) })} />
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleListItemDelete('testimonials', item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Textarea placeholder="Review content..." defaultValue={item.content} onBlur={(e) => handleListItemUpdate('testimonials', item.id, { content: e.target.value })} />
+                  </CardContent>
+                </Card>
+              ))}
+            </TabsContent>
+          </Tabs>
+        </div>
+        <div className="lg:col-span-5 relative">
+          <div className="sticky top-24 border rounded-2xl bg-slate-200/30 overflow-hidden h-[700px] shadow-inner">
+            <div className="bg-background border-b px-4 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  <div className="h-2 w-2 rounded-full bg-red-400" />
+                  <div className="h-2 w-2 rounded-full bg-amber-400" />
+                  <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                </div>
+                <div className="text-[10px] text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">
+                  localhost:3000/preview
+                </div>
+              </div>
+            </div>
+            <div className="origin-top-left transition-transform duration-300 overflow-y-auto h-full" style={{ transform: `scale(${previewScale})` }}>
+              <div className="bg-white min-h-full">
+                <div className="p-8 space-y-12">
+                  <header className="flex justify-between items-center border-b pb-4">
+                    <div className="font-bold text-xl" style={{ color: config?.brandTheme?.primaryColor }}>{config?.siteTitle}</div>
+                    <Button size="sm" style={{ backgroundColor: config?.brandTheme?.primaryColor }}>Book</Button>
+                  </header>
+                  <section className="text-center space-y-4">
+                    <h1 className="text-3xl font-bold leading-tight">{config?.heroTitle}</h1>
+                    <p className="text-sm text-muted-foreground">{config?.heroSubtitle}</p>
+                    <Button className="h-10 px-6 font-bold" style={{ background: `linear-gradient(135deg, ${config?.brandTheme?.gradientStart}, ${config?.brandTheme?.gradientEnd})` }}>
+                      {config?.ctaText}
+                    </Button>
+                  </section>
+                  <div className="grid grid-cols-2 gap-4">
+                    {config?.features?.slice(0, 2).map((f: any) => (
+                      <div key={f.id} className="p-4 border rounded-xl text-xs space-y-2">
+                        <div className="font-bold">{f.title}</div>
+                        <p className="opacity-70">{f.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-4">
+                     {config?.testimonials?.slice(0, 1).map((t: any) => (
+                       <div key={t.id} className="bg-muted/30 p-4 rounded-xl text-xs italic">
+                         "{t.content}" - <strong>{t.author}</strong>
+                       </div>
+                     ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </TabsContent>
-        <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Business Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Business Name</Label>
-                  <Input defaultValue={config?.siteTitle} onBlur={(e) => updateConfig.mutate({ siteTitle: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Currency</Label>
-                  <Input defaultValue="USD ($)" disabled />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="services" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add-on Pricing</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {addons?.items?.map((addon: any) => (
-                <div key={addon.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <span className="font-medium">{addon.name}</span>
-                    <p className="text-[10px] text-muted-foreground">{addon.description}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-sm">$</span>
-                    <Input className="w-24 text-right" defaultValue={addon.price} />
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="team" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Team Roles</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {[1, 2, 3].map((id) => (
-                <div key={id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center font-bold">T{id}</div>
-                    <div className="text-sm font-bold">Tech #{id}</div>
-                  </div>
-                  <Badge variant="outline">Verified</Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="notifications" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Alert Channels</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <Label>Push Notifications</Label>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>Email Reciepts</Label>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <div className="mt-4 text-center">
+            <p className="text-[10px] text-muted-foreground">Preview updates in real-time as you edit fields.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
