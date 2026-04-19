@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, Loader2, Lock, CreditCard, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { api } from '@/lib/api-client';
 const contactSchema = z.object({
   firstName: z.string().min(2, 'First name is required'),
@@ -21,6 +21,8 @@ type ContactValues = z.infer<typeof contactSchema>;
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<HTMLDivElement>(null);
   const setStep = useBookingStore(s => s.setStep);
   const setContact = useBookingStore(s => s.setContact);
   const vehicleSize = useBookingStore(s => s.vehicleSize);
@@ -30,18 +32,40 @@ export function ContactForm() {
   const setConfirmedBookingId = useBookingStore(s => s.setConfirmedBookingId);
   const totalPrice = useBookingStore(s => s.getTotalPrice)();
   const user = useAuthStore(s => s.user);
+  useEffect(() => {
+    // Inject Turnstile script
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+    // Turnstile Callback Setup
+    (window as any).onTurnstileSuccess = (token: string) => {
+      setTurnstileToken(token);
+    };
+    return () => {
+      document.body.removeChild(script);
+      delete (window as any).onTurnstileSuccess;
+    };
+  }, []);
   const { register, handleSubmit, formState: { errors } } = useForm<ContactValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: useBookingStore.getState().contact
   });
   const onSubmit = async (data: ContactValues) => {
+    if (!turnstileToken) return;
     setIsSubmitting(true);
     try {
+      // 1. Verify token
+      await api('/api/auth/verify-turnstile', { 
+        method: 'POST', 
+        body: JSON.stringify({ token: turnstileToken }) 
+      });
       setContact(data);
       setIsRedirecting(true);
-      // Simulate Stripe checkout flow
+      // 2. Simulate Payment & Booking
       await api('/api/payments/create-session', { method: 'POST' });
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 1500));
       const response = await api<any>('/api/bookings', {
         method: 'POST',
         body: JSON.stringify({
@@ -51,7 +75,8 @@ export function ContactForm() {
           addOns,
           dateTime,
           contact: data,
-          totalPrice
+          totalPrice,
+          turnstileToken
         })
       });
       if (response && response.id) {
@@ -61,6 +86,11 @@ export function ContactForm() {
     } catch (error) {
       setIsRedirecting(false);
       console.error('Submission failed', error);
+      // Reset turnstile on failure
+      if ((window as any).turnstile) {
+        (window as any).turnstile.reset();
+        setTurnstileToken(null);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -75,7 +105,7 @@ export function ContactForm() {
           </div>
           <div className="space-y-2">
             <h3 className="text-xl font-bold">Secure Checkout</h3>
-            <p className="text-muted-foreground text-sm">We are opening a secure Stripe session for your $20 deposit.</p>
+            <p className="text-muted-foreground text-sm">Verifying human session and opening Stripe...</p>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest"><ShieldCheck className="h-4 w-4" /> PCI Compliant</div>
         </div>
@@ -89,7 +119,7 @@ export function ContactForm() {
       </div>
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold tracking-tight">Final Details</h2>
-        <p className="text-muted-foreground mt-2">Where and who should we look for?</p>
+        <p className="text-muted-foreground mt-2">Professional service requires precision. Please confirm details.</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -114,39 +144,53 @@ export function ContactForm() {
           <Label htmlFor="address">Service Address</Label>
           <Input id="address" placeholder="123 Detail St, Suite 400" {...register('address')} />
         </div>
-        <div className="mt-8 p-6 bg-brand-50 rounded-2xl border border-brand-100 space-y-4">
+        {/* Turnstile Protection */}
+        <div className="py-2">
+          <div 
+            ref={turnstileRef}
+            className="cf-turnstile" 
+            data-sitekey="1x00000000000000000000AA" 
+            data-callback="onTurnstileSuccess"
+          ></div>
+          {!turnstileToken && (
+            <p className="text-[10px] text-amber-600 mt-2 flex items-center gap-1">
+              <ShieldAlert className="h-3 w-3" /> Security verification required
+            </p>
+          )}
+        </div>
+        <div className="mt-4 p-6 bg-brand-50 rounded-2xl border border-brand-100 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-brand-600" />
-              <span className="font-bold text-sm">Summary</span>
+              <span className="font-bold text-sm">Deposit Summary</span>
             </div>
             <Badge className="bg-brand-500">Stripe Secure</Badge>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Service Total</span>
+              <span className="text-muted-foreground">Estimated Total</span>
               <span className="font-medium">${totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-brand-700 font-bold border-t pt-2">
-              <span>Deposit Due Now</span>
+              <span>Required Deposit</span>
               <span>$20.00</span>
             </div>
           </div>
         </div>
         <div className="pt-6 border-t flex flex-col gap-4">
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center">
-            <Lock className="h-3 w-3" /> Securely encrypted via Stripe.
+            <Lock className="h-3 w-3" /> Encrypted connection.
           </div>
           <Button
             type="submit"
             size="lg"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !turnstileToken}
             className="w-full bg-brand-600 hover:bg-brand-700 h-14 text-lg font-bold shadow-lg"
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Processing...
+                Verifying...
               </>
             ) : (
               'Confirm & Pay Deposit'
