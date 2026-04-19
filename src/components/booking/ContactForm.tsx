@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useBookingStore } from '@/store/booking-store';
+import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,7 +27,9 @@ export function ContactForm() {
   const packageId = useBookingStore(s => s.packageId);
   const addOns = useBookingStore(s => s.addOns);
   const dateTime = useBookingStore(s => s.dateTime);
+  const setConfirmedBookingId = useBookingStore(s => s.setConfirmedBookingId);
   const totalPrice = useBookingStore(s => s.getTotalPrice)();
+  const user = useAuthStore(s => s.user);
   const { register, handleSubmit, formState: { errors } } = useForm<ContactValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: useBookingStore.getState().contact
@@ -35,16 +38,14 @@ export function ContactForm() {
     setIsSubmitting(true);
     try {
       setContact(data);
-      // Simulating Payment Processing Redirect / Session Creation
       setIsRedirecting(true);
+      // Simulate Stripe checkout flow
       await api('/api/payments/create-session', { method: 'POST' });
-      // Simulate Stripe verification lag
-      await new Promise(r => setTimeout(r, 1500));
       await new Promise(r => setTimeout(r, 2000));
-      await api('/api/bookings', {
+      const response = await api<any>('/api/bookings', {
         method: 'POST',
         body: JSON.stringify({
-          customerId: 'c1', 
+          customerId: user?.id || 'guest-client',
           vehicleSize,
           packageId,
           addOns,
@@ -53,6 +54,9 @@ export function ContactForm() {
           totalPrice
         })
       });
+      if (response && response.id) {
+        setConfirmedBookingId(response.id);
+      }
       setStep(6);
     } catch (error) {
       setIsRedirecting(false);
@@ -70,8 +74,8 @@ export function ContactForm() {
              <Loader2 className="h-10 w-10 text-brand-600 animate-spin" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-bold">Redirecting to Stripe...</h3>
-            <p className="text-muted-foreground text-sm">We are opening a secure checkout session for your $20 deposit.</p>
+            <h3 className="text-xl font-bold">Secure Checkout</h3>
+            <p className="text-muted-foreground text-sm">We are opening a secure Stripe session for your $20 deposit.</p>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest"><ShieldCheck className="h-4 w-4" /> PCI Compliant</div>
         </div>
@@ -84,8 +88,8 @@ export function ContactForm() {
         </Button>
       </div>
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Final Step</h2>
-        <p className="text-muted-foreground mt-2">Secure your slot with a small deposit.</p>
+        <h2 className="text-3xl font-bold tracking-tight">Final Details</h2>
+        <p className="text-muted-foreground mt-2">Where and who should we look for?</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -103,14 +107,18 @@ export function ContactForm() {
           <Input id="email" type="email" placeholder="john@example.com" {...register('email')} />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input id="phone" placeholder="(555) 000-0000" {...register('phone')} />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="address">Service Address</Label>
-          <Input id="address" placeholder="123 Detail St, Clean City, ST 12345" {...register('address')} />
+          <Input id="address" placeholder="123 Detail St, Suite 400" {...register('address')} />
         </div>
         <div className="mt-8 p-6 bg-brand-50 rounded-2xl border border-brand-100 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-brand-600" />
-              <span className="font-bold text-sm">Payment Summary</span>
+              <span className="font-bold text-sm">Summary</span>
             </div>
             <Badge className="bg-brand-500">Stripe Secure</Badge>
           </div>
@@ -120,14 +128,14 @@ export function ContactForm() {
               <span className="font-medium">${totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-brand-700 font-bold border-t pt-2">
-              <span>Refundable Deposit Due Now</span>
+              <span>Deposit Due Now</span>
               <span>$20.00</span>
             </div>
           </div>
         </div>
         <div className="pt-6 border-t flex flex-col gap-4">
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center">
-            <Lock className="h-3 w-3" /> Encrypted via Stripe. We never store your card details.
+            <Lock className="h-3 w-3" /> Securely encrypted via Stripe.
           </div>
           <Button
             type="submit"
@@ -138,10 +146,10 @@ export function ContactForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Processing Payment...
+                Processing...
               </>
             ) : (
-              'Pay Deposit & Book Now'
+              'Confirm & Pay Deposit'
             )}
           </Button>
         </div>

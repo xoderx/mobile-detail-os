@@ -6,6 +6,7 @@ export interface BookingState {
   packageId: string | null;
   addOns: string[];
   dateTime: string | null;
+  confirmedBookingId: string | null;
   availableTiers: ServiceTier[];
   availableAddOns: AddOn[];
   contact: {
@@ -20,6 +21,7 @@ export interface BookingState {
   setPackageId: (id: string) => void;
   toggleAddOn: (id: string) => void;
   setDateTime: (dateTime: string) => void;
+  setConfirmedBookingId: (id: string | null) => void;
   setContact: (contact: Partial<BookingState['contact']>) => void;
   setCatalog: (tiers: ServiceTier[], addons: AddOn[]) => void;
   getTotalPrice: () => number;
@@ -44,6 +46,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   packageId: null,
   addOns: [],
   dateTime: null,
+  confirmedBookingId: null,
   availableTiers: [],
   availableAddOns: [],
   contact: initialContact,
@@ -56,6 +59,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
       : [...state.addOns, id],
   })),
   setDateTime: (dateTime) => set({ dateTime, step: 5 }),
+  setConfirmedBookingId: (confirmedBookingId) => set({ confirmedBookingId }),
   setContact: (contact) => set((state) => ({
     contact: { ...state.contact, ...contact }
   })),
@@ -63,18 +67,15 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   getTotalPrice: () => {
     const { vehicleSize, packageId, addOns, availableTiers, availableAddOns } = get();
     let total = 0;
-    // 1. Base Package Price
     if (packageId && availableTiers.length > 0) {
       const selectedTier = availableTiers.find(t => t.id === packageId);
       if (selectedTier) {
         total += selectedTier.price;
       }
     }
-    // 2. Vehicle Premium
     if (vehicleSize && vehicleSize in VEHICLE_PREMIUMS) {
       total += VEHICLE_PREMIUMS[vehicleSize];
     }
-    // 3. Add-ons
     if (addOns.length > 0 && availableAddOns.length > 0) {
       addOns.forEach(id => {
         const addon = availableAddOns.find(a => a.id === id);
@@ -91,6 +92,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     packageId: null,
     addOns: [],
     dateTime: null,
+    confirmedBookingId: null,
     contact: initialContact,
   }),
 }));

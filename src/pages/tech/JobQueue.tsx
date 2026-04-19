@@ -5,13 +5,15 @@ import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Navigation, Play, CheckCircle, Clock, MapPin, Phone, User as UserIcon } from 'lucide-react';
+import { Navigation, Play, CheckCircle, Clock, MapPin, Phone, User as UserIcon, LogOut, Menu } from 'lucide-react';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 export default function JobQueue() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const techName = useAuthStore(s => s.user?.name);
   const techId = useAuthStore(s => s.user?.id);
+  const logout = useAuthStore(s => s.logout);
   const { data: bookingsData, isLoading } = useQuery({
     queryKey: ['bookings', techId],
     queryFn: () => api<{ items: any[] }>(`/api/bookings?technicianId=${techId}`),
@@ -25,21 +27,37 @@ export default function JobQueue() {
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bookings'] }),
   });
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   const jobs = bookingsData?.items ?? [];
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="py-8 md:py-10 lg:py-12 space-y-8">
+    <div className="min-h-screen bg-slate-50/50">
+      <header className="sticky top-0 z-50 bg-background border-b h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded bg-brand-600 flex items-center justify-center text-white font-bold text-sm">D</div>
+          <span className="font-bold tracking-tight">DetailFlow Tech</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:block text-right mr-2">
+            <p className="text-xs font-bold leading-none">{techName}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">On Duty</p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
+      <main className="max-w-2xl mx-auto px-4 py-8 space-y-8 pb-20">
         <div className="flex justify-between items-end">
           <div>
-            <span className="text-brand-600 font-bold text-sm uppercase tracking-wider">Technician Hub</span>
-            <h1 className="text-3xl font-bold tracking-tight">Daily Route</h1>
+            <h1 className="text-3xl font-bold tracking-tight">My Route</h1>
+            <p className="text-muted-foreground text-sm font-medium">{format(new Date(), 'EEEE, MMMM do')}</p>
           </div>
-          <div className="text-right flex flex-col items-end gap-1">
-            <div className="text-2xl font-bold">{format(new Date(), 'MMM dd')}</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium bg-muted/50 px-2 py-1 rounded">
-              <UserIcon className="h-3 w-3" /> Assigned to: {techName || 'Technician'}
-            </div>
-          </div>
+          <Badge variant="outline" className="h-8 px-4 bg-background shadow-sm border-brand-100 text-brand-700">
+            {jobs.filter(j => j.status !== 'completed').length} Tasks Pending
+          </Badge>
         </div>
         <div className="space-y-4">
           {isLoading ? (
@@ -49,43 +67,39 @@ export default function JobQueue() {
           ) : jobs.length > 0 ? (
             jobs.map((job) => (
               <Card key={job.id} className={`overflow-hidden border-l-4 transition-all hover:shadow-md ${
-                job.status === 'completed' ? 'border-l-emerald-500 opacity-80' :
+                job.status === 'completed' ? 'border-l-emerald-500 opacity-70' :
                 job.status === 'confirmed' ? 'border-l-brand-500' : 'border-l-slate-300'
               }`}>
                 <CardContent className="p-0">
-                  <Link to={`/tech/jobs/${job.id}`} className="block p-6 space-y-4 active:bg-muted/50">
+                  <Link to={`/tech/jobs/${job.id}`} className="block p-5 space-y-4 active:bg-muted/30">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-brand-600" />
                           <span className="font-bold">{format(new Date(job.dateTime), 'h:mm a')}</span>
-                          <Badge variant={job.status === 'completed' ? 'secondary' : 'default'} className="text-[10px]">
+                          <Badge variant={job.status === 'completed' ? 'secondary' : 'default'} className="text-[9px] font-bold">
                             {job.status.toUpperCase()}
                           </Badge>
                         </div>
-                        <h3 className="text-xl font-bold capitalize">{job.packageId} Detail</h3>
-                        <p className="text-muted-foreground text-sm uppercase tracking-tighter">{job.vehicleSize}</p>
+                        <h3 className="text-lg font-bold capitalize">{job.packageId} Detail</h3>
+                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">{job.vehicleSize}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-brand-600">${job.totalPrice}</div>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2 bg-muted/30 p-4 rounded-xl">
+                    <div className="flex flex-col gap-2 bg-muted/20 p-3 rounded-lg border border-muted/30">
                       <div className="flex items-center gap-2 text-sm">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>123 Customer Ave, Suite 400</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-brand-600 font-medium">(555) 000-0000</span>
+                        <span className="line-clamp-1">123 Service Road, Apt 4B</span>
                       </div>
                     </div>
                   </Link>
                   {job.status !== 'completed' && (
-                    <div className="grid grid-cols-2 border-t divide-x h-16">
+                    <div className="grid grid-cols-2 border-t divide-x h-14">
                       <Button variant="ghost" className="h-full rounded-none gap-2 hover:bg-brand-50" asChild>
-                        <a href={`https://maps.google.com/?q=${encodeURIComponent('123 Customer Ave')}`} target="_blank" rel="noreferrer">
-                          <Navigation className="h-4 w-4 text-brand-600" /> Navigate
+                        <a href={`https://maps.google.com/?q=${encodeURIComponent('123 Service Road')}`} target="_blank" rel="noreferrer">
+                          <Navigation className="h-4 w-4 text-brand-600" /> Map
                         </a>
                       </Button>
                       {job.status === 'confirmed' ? (
@@ -94,7 +108,7 @@ export default function JobQueue() {
                           className="h-full rounded-none gap-2 hover:bg-emerald-50 text-emerald-600 font-bold"
                           onClick={() => updateStatus.mutate({ id: job.id, status: 'completed' })}
                         >
-                          <CheckCircle className="h-4 w-4" /> Complete
+                          <CheckCircle className="h-4 w-4" /> Finish
                         </Button>
                       ) : (
                         <Button
@@ -102,7 +116,7 @@ export default function JobQueue() {
                           className="h-full rounded-none gap-2 hover:bg-brand-50 text-brand-600 font-bold"
                           onClick={() => updateStatus.mutate({ id: job.id, status: 'confirmed' })}
                         >
-                          <Play className="h-4 w-4" /> Start Job
+                          <Play className="h-4 w-4" /> Start
                         </Button>
                       )}
                     </div>
@@ -111,13 +125,13 @@ export default function JobQueue() {
               </Card>
             ))
           ) : (
-            <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed">
-              <p className="text-muted-foreground">No jobs assigned for today.</p>
-              <Button variant="link" onClick={() => queryClient.invalidateQueries({ queryKey: ['bookings'] })}>Refresh Queue</Button>
+            <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed border-muted">
+              <p className="text-muted-foreground font-medium">No assignments for today.</p>
+              <Button variant="link" className="text-brand-600 font-bold" onClick={() => queryClient.invalidateQueries({ queryKey: ['bookings'] })}>Refresh App</Button>
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
