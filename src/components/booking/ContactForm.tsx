@@ -30,21 +30,23 @@ export function ContactForm() {
   const addOns = useBookingStore(s => s.addOns);
   const dateTime = useBookingStore(s => s.dateTime);
   const setConfirmedBookingId = useBookingStore(s => s.setConfirmedBookingId);
-  const totalPrice = useBookingStore(s => s.getTotalPrice)();
+  const getTotalPrice = useBookingStore(s => s.getTotalPrice);
+  const totalPrice = getTotalPrice();
   const user = useAuthStore(s => s.user);
   useEffect(() => {
-    // Inject Turnstile script
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-    // Turnstile Callback Setup
+    const SCRIPT_ID = 'cf-turnstile-script';
+    if (!document.getElementById(SCRIPT_ID)) {
+      const script = document.createElement('script');
+      script.id = SCRIPT_ID;
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
     (window as any).onTurnstileSuccess = (token: string) => {
       setTurnstileToken(token);
     };
     return () => {
-      document.body.removeChild(script);
       delete (window as any).onTurnstileSuccess;
     };
   }, []);
@@ -56,14 +58,12 @@ export function ContactForm() {
     if (!turnstileToken) return;
     setIsSubmitting(true);
     try {
-      // 1. Verify token
-      await api('/api/auth/verify-turnstile', { 
-        method: 'POST', 
-        body: JSON.stringify({ token: turnstileToken }) 
+      await api('/api/auth/verify-turnstile', {
+        method: 'POST',
+        body: JSON.stringify({ token: turnstileToken })
       });
       setContact(data);
       setIsRedirecting(true);
-      // 2. Simulate Payment & Booking
       await api('/api/payments/create-session', { method: 'POST' });
       await new Promise(r => setTimeout(r, 1500));
       const response = await api<any>('/api/bookings', {
@@ -85,10 +85,13 @@ export function ContactForm() {
       setStep(6);
     } catch (error) {
       setIsRedirecting(false);
-      console.error('Submission failed', error);
-      // Reset turnstile on failure
+      console.error('Booking submission failed:', error);
       if ((window as any).turnstile) {
-        (window as any).turnstile.reset();
+        try {
+          (window as any).turnstile.reset();
+        } catch (e) {
+          console.warn('Turnstile reset failed', e);
+        }
         setTurnstileToken(null);
       }
     } finally {
@@ -105,7 +108,7 @@ export function ContactForm() {
           </div>
           <div className="space-y-2">
             <h3 className="text-xl font-bold">Secure Checkout</h3>
-            <p className="text-muted-foreground text-sm">Verifying human session and opening Stripe...</p>
+            <p className="text-muted-foreground text-sm">Verifying session and connecting to Stripe...</p>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest"><ShieldCheck className="h-4 w-4" /> PCI Compliant</div>
         </div>
@@ -119,42 +122,46 @@ export function ContactForm() {
       </div>
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold tracking-tight">Final Details</h2>
-        <p className="text-muted-foreground mt-2">Professional service requires precision. Please confirm details.</p>
+        <p className="text-muted-foreground mt-2">Please provide your service location and contact information.</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name</Label>
             <Input id="firstName" placeholder="John" {...register('firstName')} className={errors.firstName ? 'border-destructive' : ''} />
+            {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="lastName">Last Name</Label>
             <Input id="lastName" placeholder="Doe" {...register('lastName')} className={errors.lastName ? 'border-destructive' : ''} />
+            {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
           </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" type="email" placeholder="john@example.com" {...register('email')} />
+          <Input id="email" type="email" placeholder="john@example.com" {...register('email')} className={errors.email ? 'border-destructive' : ''} />
+          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="phone">Phone Number</Label>
-          <Input id="phone" placeholder="(555) 000-0000" {...register('phone')} />
+          <Input id="phone" placeholder="(555) 000-0000" {...register('phone')} className={errors.phone ? 'border-destructive' : ''} />
+          {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="address">Service Address</Label>
-          <Input id="address" placeholder="123 Detail St, Suite 400" {...register('address')} />
+          <Input id="address" placeholder="123 Detail St, Suite 400" {...register('address')} className={errors.address ? 'border-destructive' : ''} />
+          {errors.address && <p className="text-xs text-destructive">{errors.address.message}</p>}
         </div>
-        {/* Turnstile Protection */}
         <div className="py-2">
-          <div 
+          <div
             ref={turnstileRef}
-            className="cf-turnstile" 
-            data-sitekey="1x00000000000000000000AA" 
+            className="cf-turnstile"
+            data-sitekey="1x00000000000000000000AA"
             data-callback="onTurnstileSuccess"
           ></div>
           {!turnstileToken && (
             <p className="text-[10px] text-amber-600 mt-2 flex items-center gap-1">
-              <ShieldAlert className="h-3 w-3" /> Security verification required
+              <ShieldAlert className="h-3 w-3" /> Security verification required to proceed
             </p>
           )}
         </div>
@@ -179,7 +186,7 @@ export function ContactForm() {
         </div>
         <div className="pt-6 border-t flex flex-col gap-4">
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center">
-            <Lock className="h-3 w-3" /> Encrypted connection.
+            <Lock className="h-3 w-3" /> Encrypted connection. Your data is protected.
           </div>
           <Button
             type="submit"
@@ -190,7 +197,7 @@ export function ContactForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Verifying...
+                Processing...
               </>
             ) : (
               'Confirm & Pay Deposit'
