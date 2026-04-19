@@ -65,7 +65,11 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   })),
   setCatalog: (availableTiers, availableAddOns) => set({ availableTiers, availableAddOns }),
   getTotalPrice: () => {
-    const { vehicleSize, packageId, addOns, availableTiers, availableAddOns } = get();
+    const vehicleSize = get().vehicleSize;
+    const packageId = get().packageId;
+    const addOns = get().addOns;
+    const availableTiers = get().availableTiers;
+    const availableAddOns = get().availableAddOns;
     let total = 0;
     if (packageId && availableTiers.length > 0) {
       const selectedTier = availableTiers.find(t => t.id === packageId);
@@ -74,7 +78,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
       }
     }
     if (vehicleSize && vehicleSize in VEHICLE_PREMIUMS) {
-      total += VEHICLE_PREMIUMS[vehicleSize];
+      total += VEHICLE_PREMIUMS[vehicleSize as string];
     }
     if (addOns.length > 0 && availableAddOns.length > 0) {
       addOns.forEach(id => {

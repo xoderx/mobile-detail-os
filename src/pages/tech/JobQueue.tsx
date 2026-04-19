@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Navigation, Play, CheckCircle, Clock, MapPin, Phone, User as UserIcon, LogOut, Menu } from 'lucide-react';
+import { Navigation, Play, CheckCircle, Clock, MapPin, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 export default function JobQueue() {
@@ -36,8 +36,8 @@ export default function JobQueue() {
     <div className="min-h-screen bg-slate-50/50">
       <header className="sticky top-0 z-50 bg-background border-b h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded bg-brand-600 flex items-center justify-center text-white font-bold text-sm">D</div>
-          <span className="font-bold tracking-tight">DetailFlow Tech</span>
+          <div className="h-8 w-8 rounded bg-brand-600 flex items-center justify-center text-white font-bold text-sm">DX</div>
+          <span className="font-bold tracking-tight">Detail Deluxe Tech</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right mr-2">
@@ -52,11 +52,11 @@ export default function JobQueue() {
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-8 pb-20">
         <div className="flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Route</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Daily Route</h1>
             <p className="text-muted-foreground text-sm font-medium">{format(new Date(), 'EEEE, MMMM do')}</p>
           </div>
           <Badge variant="outline" className="h-8 px-4 bg-background shadow-sm border-brand-100 text-brand-700">
-            {jobs.filter(j => j.status !== 'completed').length} Tasks Pending
+            {jobs.filter(j => j.status !== 'completed').length} Pending
           </Badge>
         </div>
         <div className="space-y-4">
@@ -91,22 +91,25 @@ export default function JobQueue() {
                     <div className="flex flex-col gap-2 bg-muted/20 p-3 rounded-lg border border-muted/30">
                       <div className="flex items-center gap-2 text-sm">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="line-clamp-1">123 Service Road, Apt 4B</span>
+                        <span className="line-clamp-1">Client Address: See Map</span>
                       </div>
                     </div>
                   </Link>
                   {job.status !== 'completed' && (
                     <div className="grid grid-cols-2 border-t divide-x h-14">
                       <Button variant="ghost" className="h-full rounded-none gap-2 hover:bg-brand-50" asChild>
-                        <a href={`https://maps.google.com/?q=${encodeURIComponent('123 Service Road')}`} target="_blank" rel="noreferrer">
-                          <Navigation className="h-4 w-4 text-brand-600" /> Map
+                        <a href={`https://maps.google.com/?q=${encodeURIComponent('Current Location')}`} target="_blank" rel="noreferrer">
+                          <Navigation className="h-4 w-4 text-brand-600" /> Navigate
                         </a>
                       </Button>
                       {job.status === 'confirmed' ? (
                         <Button
                           variant="ghost"
                           className="h-full rounded-none gap-2 hover:bg-emerald-50 text-emerald-600 font-bold"
-                          onClick={() => updateStatus.mutate({ id: job.id, status: 'completed' })}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            updateStatus.mutate({ id: job.id, status: 'completed' });
+                          }}
                         >
                           <CheckCircle className="h-4 w-4" /> Finish
                         </Button>
@@ -114,7 +117,10 @@ export default function JobQueue() {
                         <Button
                           variant="ghost"
                           className="h-full rounded-none gap-2 hover:bg-brand-50 text-brand-600 font-bold"
-                          onClick={() => updateStatus.mutate({ id: job.id, status: 'confirmed' })}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            updateStatus.mutate({ id: job.id, status: 'confirmed' });
+                          }}
                         >
                           <Play className="h-4 w-4" /> Start
                         </Button>
@@ -126,8 +132,8 @@ export default function JobQueue() {
             ))
           ) : (
             <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed border-muted">
-              <p className="text-muted-foreground font-medium">No assignments for today.</p>
-              <Button variant="link" className="text-brand-600 font-bold" onClick={() => queryClient.invalidateQueries({ queryKey: ['bookings'] })}>Refresh App</Button>
+              <p className="text-muted-foreground font-medium">No assignments scheduled for you today.</p>
+              <Button variant="link" className="text-brand-600 font-bold" onClick={() => queryClient.invalidateQueries({ queryKey: ['bookings'] })}>Refresh Queue</Button>
             </div>
           )}
         </div>

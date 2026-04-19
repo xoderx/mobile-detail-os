@@ -1,5 +1,6 @@
 import { IndexedEntity } from "./core-utils";
-import type { ServiceTier, AddOn, AppConfig, User } from "@shared/types";
+import type { ServiceTier, AddOn, AppConfig, User, VehicleSize } from "@shared/types";
+import { subDays, addDays } from "date-fns";
 export interface Customer {
   id: string;
   firstName: string;
@@ -11,7 +12,7 @@ export interface Customer {
 export interface Booking {
   id: string;
   customerId: string;
-  vehicleSize: string;
+  vehicleSize: VehicleSize;
   packageId: string;
   dateTime: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
@@ -32,6 +33,12 @@ export class CustomerEntity extends IndexedEntity<Customer> {
   static readonly entityName = "customer";
   static readonly indexName = "customers";
   static readonly initialState: Customer = { id: "", firstName: "", lastName: "", email: "", phone: "" };
+  static seedData: Customer[] = [
+    { id: "cust-1", firstName: "Robert", lastName: "Chen", email: "robert.c@gmail.com", phone: "555-0101", lastServiceDate: subDays(new Date(), 5).getTime() },
+    { id: "cust-2", firstName: "Elena", lastName: "Rodriguez", email: "elena.rod@outlook.com", phone: "555-0102", lastServiceDate: subDays(new Date(), 12).getTime() },
+    { id: "cust-3", firstName: "Marcus", lastName: "Thorne", email: "m.thorne@techcorp.io", phone: "555-0103" },
+    { id: "cust-4", firstName: "Sarah", lastName: "Jenkins", email: "sarahj@me.com", phone: "555-0104", lastServiceDate: subDays(new Date(), 2).getTime() },
+  ];
 }
 export class BookingEntity extends IndexedEntity<Booking> {
   static readonly entityName = "booking";
@@ -39,11 +46,22 @@ export class BookingEntity extends IndexedEntity<Booking> {
   static readonly initialState: Booking = {
     id: "", customerId: "", vehicleSize: "sedan", packageId: "basic", dateTime: "", status: 'pending', totalPrice: 0, technicianId: "tech-1", checklist: {}
   };
+  static seedData: Booking[] = [
+    { id: "b-1", customerId: "cust-1", vehicleSize: "luxury", packageId: "ceramic", dateTime: subDays(new Date(), 5).toISOString(), status: 'completed', totalPrice: 359, technicianId: "tech-1", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
+    { id: "b-2", customerId: "cust-2", vehicleSize: "suv", packageId: "premium", dateTime: subDays(new Date(), 1).toISOString(), status: 'completed', totalPrice: 169, technicianId: "tech-2", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
+    { id: "b-3", customerId: "cust-3", vehicleSize: "sedan", packageId: "basic", dateTime: addDays(new Date(), 1).toISOString(), status: 'confirmed', totalPrice: 89, technicianId: "tech-1", checklist: {} },
+    { id: "b-4", customerId: "cust-4", vehicleSize: "truck", packageId: "premium", dateTime: addDays(new Date(), 2).toISOString(), status: 'pending', totalPrice: 189, technicianId: "unassigned", checklist: {} },
+  ];
 }
 export class SubscriptionEntity extends IndexedEntity<Subscription> {
   static readonly entityName = "subscription";
   static readonly indexName = "subscriptions";
   static readonly initialState: Subscription = { id: "", customerId: "", planType: "basic", status: "active", nextRenewal: 0, price: 0 };
+  static seedData: Subscription[] = [
+    { id: "s-1", customerId: "cust-1", planType: "elite", status: "active", nextRenewal: addDays(new Date(), 15).getTime(), price: 199 },
+    { id: "s-2", customerId: "cust-2", planType: "premium", status: "active", nextRenewal: addDays(new Date(), 22).getTime(), price: 129 },
+    { id: "s-3", customerId: "cust-4", planType: "basic", status: "active", nextRenewal: addDays(new Date(), 5).getTime(), price: 79 },
+  ];
 }
 export class ServiceTierEntity extends IndexedEntity<ServiceTier> {
   static readonly entityName = "service-tier";
@@ -65,12 +83,11 @@ export class AddOnEntity extends IndexedEntity<AddOn> {
     { id: 'headlight', name: 'Headlight Restoration', price: 60, description: 'Restore clarity to fogged headlights.' },
   ];
 }
-
 export class UserAccountEntity extends IndexedEntity<User> {
   static readonly entityName = "user-account";
   static readonly indexName = "user-accounts";
-  static readonly initialState: User = { 
-    id: "", name: "", email: "", role: "customer", isActive: true, createdAt: 0 
+  static readonly initialState: User = {
+    id: "", name: "", email: "", role: "customer", isActive: true, createdAt: 0
   };
   static seedData: User[] = [
     { id: "admin-1", name: "System Admin", email: "admin@detaildeluxe.com", role: "admin", isActive: true, createdAt: Date.now() },
@@ -79,17 +96,16 @@ export class UserAccountEntity extends IndexedEntity<User> {
     { id: "cust-1", name: "Demo Customer", email: "customer@gmail.com", role: "customer", isActive: true, createdAt: Date.now() },
   ];
 }
-
 export class ConfigEntity extends IndexedEntity<AppConfig> {
   static readonly entityName = "config";
   static readonly indexName = "configs";
   static readonly initialState: AppConfig = {
     id: "global-settings",
-    siteTitle: "DetailFlow OS",
+    siteTitle: "Detail Deluxe OS",
     heroTitle: "Showroom quality at your doorstep.",
-    heroSubtitle: "Mobile auto detailing reimagined. We bring premium care directly to you.",
+    heroSubtitle: "Premium mobile auto detailing reimagined. We bring professional car care directly to you.",
     ctaText: "Book Your Experience",
-    aboutText: "Founded by automotive enthusiasts, DetailFlow combines cutting-edge techniques with premium products to ensure your vehicle remains in showroom condition.",
+    aboutText: "Founded by automotive enthusiasts, Detail Deluxe combines cutting-edge techniques with premium products to ensure your vehicle remains in showroom condition.",
     features: [
       { id: 'f1', title: 'Exterior Polish', description: 'Flawless paint correction and ceramic coatings.', iconName: 'SprayCan' },
       { id: 'f2', title: 'Interior Sanctuary', description: 'Deep cleaning and leather restoration.', iconName: 'CarFront' },
