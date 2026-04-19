@@ -2,28 +2,29 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableRow, 
-  TableHead, 
-  TableCell 
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell
 } from '@/components/ui/table';
-import { 
-  DollarSign, 
-  Briefcase, 
-  Users as UsersIcon, 
-  ArrowUpRight 
+import {
+  DollarSign,
+  Briefcase,
+  Users as UsersIcon,
+  ArrowUpRight,
+  Star
 } from 'lucide-react';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
 } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 const chartData = [
@@ -50,13 +51,13 @@ export function Dashboard() {
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="h-8 px-4 text-brand-600 border-brand-200 bg-brand-50">Operational</Badge>
-          <Badge variant="outline" className="h-8 px-4">Beta v1.0</Badge>
+          <Badge variant="outline" className="h-8 px-4">Phase 2 Active</Badge>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -68,37 +69,37 @@ export function Dashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Jobs</CardTitle>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{bookings.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Currently being serviced
+              Pending and In-Progress
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Customers</CardTitle>
             <UsersIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">248</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Active in database
+              Registered Clients
             </p>
           </CardContent>
         </Card>
         <Card className="bg-brand-500 text-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Satisfaction</CardTitle>
+            <CardTitle className="text-sm font-medium">Satisfaction Rate</CardTitle>
             <Star className="h-4 w-4 text-brand-100" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">4.9/5.0</div>
             <p className="text-xs text-brand-100 mt-1">
-              Based on 112 reviews
+              Based on verified reviews
             </p>
           </CardContent>
         </Card>
@@ -106,23 +107,23 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
+            <CardTitle>Revenue Forecast</CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#0ea5e9" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--brand-500))" strokeWidth={3} dot={{ r: 4, fill: "hsl(var(--brand-500))" }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Bookings</CardTitle>
+            <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -133,7 +134,7 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookings.map((booking) => (
+                {bookings.length > 0 ? bookings.map((booking) => (
                   <TableRow key={booking.id}>
                     <TableCell className="font-medium">
                       {booking.customerId === 'c1' ? 'John Doe' : 'Jane Smith'}
@@ -145,7 +146,11 @@ export function Dashboard() {
                       </Badge>
                     </TableCell>
                   </TableRow>
-                ))}
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center py-4 text-muted-foreground">No recent bookings</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>
