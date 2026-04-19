@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore, UserRole } from '@/store/auth-store';
+import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Hammer, User as UserIcon, Lock } from 'lucide-react';
@@ -8,17 +8,17 @@ import { motion } from 'framer-motion';
 export function LoginPage() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
-  const handleQuickLogin = (role: UserRole) => {
+  const handleQuickLogin = (role: 'admin' | 'tech' | 'customer') => {
     const mockUser = {
       id: `u-${role}`,
-      name: role === 'admin' ? 'Business Owner' : role === 'tech' ? 'Lead Technician' : 'Valued Customer',
+      name: role === 'admin' ? 'Business Owner' : role === 'tech' ? 'John Tech' : 'Valued Customer',
       email: `${role}@detailflow.com`,
       role,
     };
     login(mockUser);
     if (role === 'admin') navigate('/admin');
     else if (role === 'tech') navigate('/tech');
-    else navigate('/');
+    else navigate('/my-bookings');
   };
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,9 +38,9 @@ export function LoginPage() {
               <CardDescription>Select your role to access the DetailFlow OS</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 p-6">
-              <Button 
+              <Button
                 onClick={() => handleQuickLogin('admin')}
-                variant="outline" 
+                variant="outline"
                 className="w-full h-16 justify-start gap-4 hover:border-brand-500 hover:bg-brand-50 group transition-all"
               >
                 <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
@@ -51,9 +51,9 @@ export function LoginPage() {
                   <div className="text-xs text-muted-foreground">Manage operations & revenue</div>
                 </div>
               </Button>
-              <Button 
+              <Button
                 onClick={() => handleQuickLogin('tech')}
-                variant="outline" 
+                variant="outline"
                 className="w-full h-16 justify-start gap-4 hover:border-brand-500 hover:bg-brand-50 group transition-all"
               >
                 <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
@@ -64,9 +64,9 @@ export function LoginPage() {
                   <div className="text-xs text-muted-foreground">View daily route & jobs</div>
                 </div>
               </Button>
-              <Button 
+              <Button
                 onClick={() => handleQuickLogin('customer')}
-                variant="outline" 
+                variant="outline"
                 className="w-full h-16 justify-start gap-4 hover:border-brand-500 hover:bg-brand-50 group transition-all"
               >
                 <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand-100 transition-colors">

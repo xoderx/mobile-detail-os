@@ -1,40 +1,47 @@
-import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  ChevronLeft, 
-  MapPin, 
-  Phone, 
-  Navigation, 
-  CheckCircle2, 
-  Clock, 
-  Car, 
+import {
+  ChevronLeft,
+  MapPin,
+  Phone,
+  Navigation,
+  CheckCircle2,
+  Clock,
+  Car,
   Package,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+const DEFAULT_CHECKLIST = {
+  'Exterior Wash': false,
+  'Wheel Cleaning': false,
+  'Interior Vacuum': false,
+  'Glass Cleaning': false,
+  'Tire Dressing': false,
+};
 export default function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [checklist, setChecklist] = useState<Record<string, boolean>>({
-    'Exterior Wash': false,
-    'Wheel Cleaning': false,
-    'Interior Vacuum': false,
-    'Glass Cleaning': false,
-    'Tire Dressing': false,
-  });
+  const [localChecklist, setLocalChecklist] = useState<Record<string, boolean>>(DEFAULT_CHECKLIST);
   const { data: booking, isLoading } = useQuery({
     queryKey: ['booking', id],
     queryFn: () => api<any>(`/api/bookings/${id}`),
     enabled: !!id,
   });
+  useEffect(() => {
+    if (booking?.checklist) {
+      setLocalChecklist(prev => ({ ...prev, ...booking.checklist }));
+    }
+  }, [booking]);
   const updateStatus = useMutation({
     mutationFn: (status: string) =>
       api(`/api/bookings/${id}/status`, {
@@ -46,12 +53,24 @@ export default function JobDetails() {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
-  if (isLoading) return <div className="p-12 text-center">Loading job details...</div>;
+  const updateChecklist = useMutation({
+    mutationFn: (checklist: Record<string, boolean>) =>
+      api(`/api/bookings/${id}/checklist`, {
+        method: 'PATCH',
+        body: JSON.stringify({ checklist })
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['booking', id] });
+    },
+  });
+  if (isLoading) return <div className="p-12 text-center flex items-center justify-center gap-2"><Loader2 className="animate-spin h-5 w-5" /> Loading job details...</div>;
   if (!booking) return <div className="p-12 text-center">Job not found.</div>;
   const toggleCheck = (item: string) => {
-    setChecklist(prev => ({ ...prev, [item]: !prev[item] }));
+    const next = { ...localChecklist, [item]: !localChecklist[item] };
+    setLocalChecklist(next);
+    updateChecklist.mutate(next);
   };
-  const allChecked = Object.values(checklist).every(v => v);
+  const allChecked = Object.values(localChecklist).every(v => v);
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="py-8 md:py-10 lg:py-12 space-y-8">
@@ -76,17 +95,22 @@ export default function JobDetails() {
               </div>
             </motion.div>
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-brand-500" />
                   Service Checklist
                 </CardTitle>
+                {updateChecklist.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
               </CardHeader>
               <CardContent className="space-y-4">
-                {Object.keys(checklist).map((item) => (
-                  <div key={item} className="flex items-center space-x-3 p-3 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => toggleCheck(item)}>
-                    <Checkbox checked={checklist[item]} onCheckedChange={() => toggleCheck(item)} id={item} />
-                    <label htmlFor={item} className={`flex-1 text-sm font-medium leading-none cursor-pointer ${checklist[item] ? 'line-through text-muted-foreground' : ''}`}>
+                {Object.keys(localChecklist).map((item) => (
+                  <div 
+                    key={item} 
+                    className="flex items-center space-x-3 p-3 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" 
+                    onClick={() => toggleCheck(item)}
+                  >
+                    <Checkbox checked={localChecklist[item]} onCheckedChange={() => toggleCheck(item)} id={item} />
+                    <label htmlFor={item} className={`flex-1 text-sm font-medium leading-none cursor-pointer ${localChecklist[item] ? 'line-through text-muted-foreground' : ''}`}>
                       {item}
                     </label>
                   </div>
@@ -118,7 +142,8 @@ export default function JobDetails() {
                   </Button>
                 )}
                 {booking.status === 'confirmed' && (
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 h-12" disabled={!allChecked} onClick={() => updateStatus.mutate('completed')}>
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 h-12" disabled={!allChecked || updateStatus.isPending} onClick={() => updateStatus.mutate('completed')}>
+                    {updateStatus.isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                     {allChecked ? 'Complete Job' : 'Complete Checklist First'}
                   </Button>
                 )}

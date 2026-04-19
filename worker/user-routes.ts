@@ -8,7 +8,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // AUTH
   app.post('/api/auth/login', async (c) => {
     const { role } = await c.req.json();
-    return ok(c, { id: crypto.randomUUID(), name: 'User Name', role, email: 'user@example.com' });
+    return ok(c, { id: `u-${role}`, name: role === 'admin' ? 'Admin User' : role === 'tech' ? 'John Tech' : 'Valued Customer', role, email: 'user@example.com' });
   });
   // WEATHER
   app.get('/api/weather', (c) => {
@@ -51,7 +51,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const entity = new BookingEntity(c.env, id);
     const state = await entity.getState();
     if (!state.id) return notFound(c, 'Booking not found');
-    // Enrich with mock customer data for detail view
     return ok(c, {
       ...state,
       contact: { firstName: 'Demo', lastName: 'Customer', phone: '555-0199', address: '123 Detail Lane' },
@@ -63,7 +62,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const booking = await BookingEntity.create(c.env, {
       ...data,
       id: crypto.randomUUID(),
-      status: 'pending'
+      status: 'pending',
+      checklist: {}
     });
     return ok(c, booking);
   });
@@ -74,6 +74,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await entity.patch({ status: status as any });
     return ok(c, { id, status });
   });
+  app.patch('/api/bookings/:id/checklist', async (c) => {
+    const id = c.req.param('id');
+    const { checklist } = (await c.req.json()) as { checklist: Record<string, boolean> };
+    const entity = new BookingEntity(c.env, id);
+    await entity.patch({ checklist });
+    return ok(c, { id, checklist });
+  });
   app.post('/api/bookings/:id/assign', async (c) => {
     const id = c.req.param('id');
     const { technicianId } = (await c.req.json()) as { technicianId: string };
@@ -81,7 +88,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await entity.patch({ technicianId });
     return ok(c, { id, technicianId });
   });
-  // CUSTOMERS & SUBSCRIPTIONS (Simplified list)
+  // CUSTOMERS & SUBSCRIPTIONS
   app.get('/api/customers', async (c) => {
     await CustomerEntity.ensureSeed(c.env);
     return ok(c, await CustomerEntity.list(c.env));

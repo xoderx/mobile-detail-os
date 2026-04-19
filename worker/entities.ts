@@ -17,6 +17,7 @@ export interface Booking {
   totalPrice: number;
   technicianId?: string;
   location?: string;
+  checklist?: Record<string, boolean>;
 }
 export interface Subscription {
   id: string;
@@ -39,11 +40,33 @@ export class BookingEntity extends IndexedEntity<Booking> {
   static readonly entityName = "booking";
   static readonly indexName = "bookings";
   static readonly initialState: Booking = {
-    id: "", customerId: "", vehicleSize: "sedan", packageId: "basic", dateTime: "", status: 'pending', totalPrice: 0, technicianId: "tech-1"
+    id: "", customerId: "", vehicleSize: "sedan", packageId: "basic", dateTime: "", status: 'pending', totalPrice: 0, technicianId: "tech-1", checklist: {}
   };
   static seedData: Booking[] = [
-    { id: "b1", customerId: "c1", vehicleSize: "suv", packageId: "premium", dateTime: new Date().toISOString(), status: 'confirmed', totalPrice: 150, technicianId: "tech-1", location: "123 Maple St" },
-    { id: "b2", customerId: "c2", vehicleSize: "sedan", packageId: "basic", dateTime: new Date(Date.now() + 86400000).toISOString(), status: 'pending', totalPrice: 80, technicianId: "tech-1", location: "456 Oak Ave" }
+    { 
+      id: "b1", 
+      customerId: "c1", 
+      vehicleSize: "suv", 
+      packageId: "premium", 
+      dateTime: new Date().toISOString(), 
+      status: 'confirmed', 
+      totalPrice: 150, 
+      technicianId: "u-tech", 
+      location: "123 Maple St",
+      checklist: { 'Exterior Wash': true, 'Wheel Cleaning': false }
+    },
+    { 
+      id: "b2", 
+      customerId: "c2", 
+      vehicleSize: "sedan", 
+      packageId: "basic", 
+      dateTime: new Date(Date.now() + 86400000).toISOString(), 
+      status: 'pending', 
+      totalPrice: 80, 
+      technicianId: "u-tech", 
+      location: "456 Oak Ave",
+      checklist: {}
+    }
   ];
 }
 export class SubscriptionEntity extends IndexedEntity<Subscription> {

@@ -1,19 +1,24 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
+import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Navigation, Play, CheckCircle, Clock, MapPin, Phone } from 'lucide-react';
+import { Navigation, Play, CheckCircle, Clock, MapPin, Phone, User as UserIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
 export default function JobQueue() {
   const queryClient = useQueryClient();
+  const techName = useAuthStore(s => s.user?.name);
+  const techId = useAuthStore(s => s.user?.id);
   const { data: bookingsData, isLoading } = useQuery({
-    queryKey: ['bookings'],
-    queryFn: () => api<{ items: any[] }>('/api/bookings'),
+    queryKey: ['bookings', techId],
+    queryFn: () => api<{ items: any[] }>(`/api/bookings?technicianId=${techId}`),
+    enabled: !!techId,
   });
   const updateStatus = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => 
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
       api(`/api/bookings/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status })
@@ -29,9 +34,11 @@ export default function JobQueue() {
             <span className="text-brand-600 font-bold text-sm uppercase tracking-wider">Technician Hub</span>
             <h1 className="text-3xl font-bold tracking-tight">Daily Route</h1>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end gap-1">
             <div className="text-2xl font-bold">{format(new Date(), 'MMM dd')}</div>
-            <div className="text-sm text-muted-foreground">Assigned to: Tech #1</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium bg-muted/50 px-2 py-1 rounded">
+              <UserIcon className="h-3 w-3" /> Assigned to: {techName || 'Technician'}
+            </div>
           </div>
         </div>
         <div className="space-y-4">
@@ -41,12 +48,12 @@ export default function JobQueue() {
             </div>
           ) : jobs.length > 0 ? (
             jobs.map((job) => (
-              <Card key={job.id} className={`overflow-hidden border-l-4 ${
-                job.status === 'completed' ? 'border-l-emerald-500' : 
+              <Card key={job.id} className={`overflow-hidden border-l-4 transition-all hover:shadow-md ${
+                job.status === 'completed' ? 'border-l-emerald-500 opacity-80' :
                 job.status === 'confirmed' ? 'border-l-brand-500' : 'border-l-slate-300'
               }`}>
                 <CardContent className="p-0">
-                  <div className="p-6 space-y-4">
+                  <Link to={`/tech/jobs/${job.id}`} className="block p-6 space-y-4 active:bg-muted/50">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -73,7 +80,7 @@ export default function JobQueue() {
                         <span className="text-brand-600 font-medium">(555) 000-0000</span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                   {job.status !== 'completed' && (
                     <div className="grid grid-cols-2 border-t divide-x h-16">
                       <Button variant="ghost" className="h-full rounded-none gap-2 hover:bg-brand-50" asChild>
@@ -82,16 +89,16 @@ export default function JobQueue() {
                         </a>
                       </Button>
                       {job.status === 'confirmed' ? (
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           className="h-full rounded-none gap-2 hover:bg-emerald-50 text-emerald-600 font-bold"
                           onClick={() => updateStatus.mutate({ id: job.id, status: 'completed' })}
                         >
                           <CheckCircle className="h-4 w-4" /> Complete
                         </Button>
                       ) : (
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           className="h-full rounded-none gap-2 hover:bg-brand-50 text-brand-600 font-bold"
                           onClick={() => updateStatus.mutate({ id: job.id, status: 'confirmed' })}
                         >
@@ -106,6 +113,7 @@ export default function JobQueue() {
           ) : (
             <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed">
               <p className="text-muted-foreground">No jobs assigned for today.</p>
+              <Button variant="link" onClick={() => queryClient.invalidateQueries({ queryKey: ['bookings'] })}>Refresh Queue</Button>
             </div>
           )}
         </div>
