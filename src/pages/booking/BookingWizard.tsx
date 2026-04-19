@@ -12,6 +12,7 @@ import { AddOnSelection } from '@/components/booking/AddOnSelection';
 import { ScheduleStep } from '@/components/booking/ScheduleStep';
 import { ContactForm } from '@/components/booking/ContactForm';
 import { SuccessStep } from '@/components/booking/SuccessStep';
+import type { VehicleSize } from '@shared/types';
 export function BookingWizard() {
   const step = useBookingStore(s => s.step);
   const vehicleSize = useBookingStore(s => s.vehicleSize);
@@ -19,6 +20,7 @@ export function BookingWizard() {
   const dateTime = useBookingStore(s => s.dateTime);
   const getTotalPrice = useBookingStore(s => s.getTotalPrice);
   const setCatalog = useBookingStore(s => s.setCatalog);
+  const setVehicleSize = useBookingStore(s => s.setVehicleSize);
   const { data: tiers, isLoading: tiersLoading } = useQuery({
     queryKey: ['cms-services'],
     queryFn: () => api<{ items: any[] }>('/api/cms/services'),
@@ -94,7 +96,7 @@ export function BookingWizard() {
                       ].map((item) => (
                         <button
                           key={item.id}
-                          onClick={() => useBookingStore.getState().setVehicleSize(item.id)}
+                          onClick={() => setVehicleSize(item.id as VehicleSize)}
                           className={`p-6 rounded-xl border-2 text-left transition-all relative ${vehicleSize === item.id ? 'border-brand-500 bg-brand-50/30 shadow-md ring-1 ring-brand-500' : 'border-border hover:border-brand-200'}`}
                         >
                           <div className="text-3xl mb-4">{item.icon}</div>

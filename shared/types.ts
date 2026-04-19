@@ -10,6 +10,20 @@ export interface User {
   role: 'admin' | 'tech' | 'customer';
 }
 export type VehicleSize = 'sedan' | 'suv' | 'truck' | 'luxury';
+export interface FeatureItem {
+  id: string;
+  title: string;
+  description: string;
+  iconName: string;
+}
+export interface Testimonial {
+  id: string;
+  author: string;
+  role: string;
+  content: string;
+  rating: number;
+  avatarUrl?: string;
+}
 export interface ServiceTier {
   id: string;
   name: string;
@@ -29,6 +43,15 @@ export interface AppConfig {
   heroTitle: string;
   heroSubtitle: string;
   aboutText: string;
+  ctaText: string;
+  features: FeatureItem[];
+  testimonials: Testimonial[];
+  brandTheme: {
+    primaryColor: string;
+    gradientStart: string;
+    gradientEnd: string;
+    fontScale: number;
+  };
   integrations: {
     stripe: boolean;
     twilio: boolean;

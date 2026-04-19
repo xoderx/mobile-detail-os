@@ -73,7 +73,22 @@ export class ConfigEntity extends IndexedEntity<AppConfig> {
     siteTitle: "DetailFlow OS",
     heroTitle: "Showroom quality at your doorstep.",
     heroSubtitle: "Mobile auto detailing reimagined. We bring premium care directly to you.",
-    aboutText: "Founded by automotive enthusiasts, DetailFlow combines cutting-edge techniques with premium products.",
+    ctaText: "Book Your Experience",
+    aboutText: "Founded by automotive enthusiasts, DetailFlow combines cutting-edge techniques with premium products to ensure your vehicle remains in showroom condition.",
+    features: [
+      { id: 'f1', title: 'Exterior Polish', description: 'Flawless paint correction and ceramic coatings.', iconName: 'SprayCan' },
+      { id: 'f2', title: 'Interior Sanctuary', description: 'Deep cleaning and leather restoration.', iconName: 'CarFront' },
+      { id: 'f3', title: 'Ultimate Protection', description: 'Advanced shielding against harsh elements.', iconName: 'ShieldCheck' }
+    ],
+    testimonials: [
+      { id: 't1', author: 'Mark Stevens', role: 'Tesla Model S Owner', content: 'The best mobile service I have ever used. My car looks better than the day I bought it.', rating: 5 }
+    ],
+    brandTheme: {
+      primaryColor: "#0ea5e9",
+      gradientStart: "#0ea5e9",
+      gradientEnd: "#0284c7",
+      fontScale: 1
+    },
     integrations: { stripe: true, twilio: false, googleMaps: true },
     keys: { stripePublicKey: "pk_test_placeholder", twilioSid: "AC_placeholder" }
   };

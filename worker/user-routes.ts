@@ -42,7 +42,16 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.patch('/api/cms/config', async (c) => {
     const data = await c.req.json();
     const entity = new ConfigEntity(c.env, 'global-settings');
-    await entity.patch(data);
+    const current = await entity.getState();
+    // Deep merge for specific sub-objects to prevent data loss
+    const merged = {
+      ...current,
+      ...data,
+      brandTheme: data.brandTheme ? { ...current.brandTheme, ...data.brandTheme } : current.brandTheme,
+      integrations: data.integrations ? { ...current.integrations, ...data.integrations } : current.integrations,
+      keys: data.keys ? { ...current.keys, ...data.keys } : current.keys
+    };
+    await entity.save(merged);
     return ok(c, await entity.getState());
   });
   // CMS: SERVICES
