@@ -8,10 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Building2, CreditCard, Users, Bell, Globe, 
-  Settings2, Package, Plus, Trash2, ShieldCheck, 
-  Smartphone, Download, Loader2 
+import { Badge } from '@/components/ui/badge';
+import {
+  Building2, CreditCard, Users, Bell, Globe,
+  Settings2, Package, Plus, Trash2, ShieldCheck,
+  Smartphone, Download, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 export default function Settings() {
@@ -49,7 +50,7 @@ TWILIO_SID="${config?.keys?.twilioSid}"
     a.download = 'detailflow.env';
     a.click();
   };
-  if (configLoading || servicesLoading || addonsLoading) return <div className="p-12 text-center"><Loader2 className="animate-spin h-6 w-6 mx-auto" /></div>;
+  if (configLoading || servicesLoading || addonsLoading) return <div className="p-12 text-center flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin h-8 w-8 text-brand-500" /></div>;
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex justify-between items-center">
@@ -82,8 +83,8 @@ TWILIO_SID="${config?.keys?.twilioSid}"
                       <Label className="text-xs">Stripe Payments</Label>
                       <p className="text-[10px] text-muted-foreground">Secure deposits</p>
                     </div>
-                    <Switch 
-                      checked={config?.integrations?.stripe} 
+                    <Switch
+                      checked={config?.integrations?.stripe}
                       onCheckedChange={(v) => updateConfig.mutate({ integrations: { ...config.integrations, stripe: v } })}
                     />
                   </div>
@@ -92,8 +93,8 @@ TWILIO_SID="${config?.keys?.twilioSid}"
                       <Label className="text-xs">Twilio SMS</Label>
                       <p className="text-[10px] text-muted-foreground">Auto notifications</p>
                     </div>
-                    <Switch 
-                      checked={config?.integrations?.twilio} 
+                    <Switch
+                      checked={config?.integrations?.twilio}
                       onCheckedChange={(v) => updateConfig.mutate({ integrations: { ...config.integrations, twilio: v } })}
                     />
                   </div>
@@ -109,14 +110,14 @@ TWILIO_SID="${config?.keys?.twilioSid}"
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label>Hero Title</Label>
-                    <Input 
-                      defaultValue={config?.heroTitle} 
+                    <Input
+                      defaultValue={config?.heroTitle}
                       onBlur={(e) => updateConfig.mutate({ heroTitle: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Hero Subtitle</Label>
-                    <Textarea 
+                    <Textarea
                       defaultValue={config?.heroSubtitle}
                       onBlur={(e) => updateConfig.mutate({ heroSubtitle: e.target.value })}
                     />
@@ -124,16 +125,16 @@ TWILIO_SID="${config?.keys?.twilioSid}"
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Stripe Key Placeholder</Label>
-                      <Input 
-                        defaultValue={config?.keys?.stripePublicKey} 
+                      <Input
+                        defaultValue={config?.keys?.stripePublicKey}
                         onBlur={(e) => updateConfig.mutate({ keys: { ...config.keys, stripePublicKey: e.target.value } })}
                         placeholder="pk_test_..."
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Twilio SID Placeholder</Label>
-                      <Input 
-                        defaultValue={config?.keys?.twilioSid} 
+                      <Input
+                        defaultValue={config?.keys?.twilioSid}
                         onBlur={(e) => updateConfig.mutate({ keys: { ...config.keys, twilioSid: e.target.value } })}
                         placeholder="AC..."
                       />
@@ -179,7 +180,7 @@ TWILIO_SID="${config?.keys?.twilioSid}"
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Business Name</Label>
-                  <Input defaultValue={config?.siteTitle} />
+                  <Input defaultValue={config?.siteTitle} onBlur={(e) => updateConfig.mutate({ siteTitle: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <Label>Currency</Label>

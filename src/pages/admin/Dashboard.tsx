@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { DollarSign, Users as UsersIcon, ArrowUpRight, Star, TrendingUp, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +31,7 @@ export function Dashboard() {
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="h-8 px-4 text-brand-600 border-brand-200 bg-brand-50">Operational</Badge>
-          <Badge variant="outline" className="h-8 px-4">Phase 8 Live</Badge>
+          <Badge variant="outline" className="h-8 px-4">System Live</Badge>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

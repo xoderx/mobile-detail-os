@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { ServiceTier, AddOn, VehicleSize } from '@shared/types';
 export interface BookingState {
   step: number;
-  vehicleSize: string | null;
+  vehicleSize: VehicleSize | null;
   packageId: string | null;
   addOns: string[];
   dateTime: string | null;
@@ -16,7 +16,7 @@ export interface BookingState {
     address: string;
   };
   setStep: (step: number) => void;
-  setVehicleSize: (size: string) => void;
+  setVehicleSize: (size: VehicleSize) => void;
   setPackageId: (id: string) => void;
   toggleAddOn: (id: string) => void;
   setDateTime: (dateTime: string) => void;
@@ -63,19 +63,26 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   getTotalPrice: () => {
     const { vehicleSize, packageId, addOns, availableTiers, availableAddOns } = get();
     let total = 0;
-    const selectedTier = availableTiers.find(t => t.id === packageId);
-    if (selectedTier) {
-      total += selectedTier.price;
+    // 1. Base Package Price
+    if (packageId && availableTiers.length > 0) {
+      const selectedTier = availableTiers.find(t => t.id === packageId);
+      if (selectedTier) {
+        total += selectedTier.price;
+      }
     }
+    // 2. Vehicle Premium
     if (vehicleSize && vehicleSize in VEHICLE_PREMIUMS) {
       total += VEHICLE_PREMIUMS[vehicleSize];
     }
-    addOns.forEach(id => {
-      const addon = availableAddOns.find(a => a.id === id);
-      if (addon) {
-        total += addon.price;
-      }
-    });
+    // 3. Add-ons
+    if (addOns.length > 0 && availableAddOns.length > 0) {
+      addOns.forEach(id => {
+        const addon = availableAddOns.find(a => a.id === id);
+        if (addon) {
+          total += addon.price;
+        }
+      });
+    }
     return total;
   },
   reset: () => set({
