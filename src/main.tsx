@@ -13,6 +13,8 @@ import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import { BookingWizard } from '@/pages/booking/BookingWizard'
+import { LoginPage } from '@/pages/LoginPage'
+import { AuthGuard } from '@/components/auth/AuthGuard'
 import { Dashboard } from '@/pages/admin/Dashboard'
 import Customers from '@/pages/admin/Customers'
 import Schedule from '@/pages/admin/Schedule'
@@ -33,54 +35,71 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
   },
   {
+    path: "/login",
+    element: <LoginPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
     path: "/admin",
     element: (
-      <AppLayout container>
-        <Dashboard />
-      </AppLayout>
+      <AuthGuard allowedRoles={["admin"]}>
+        <AppLayout container>
+          <Dashboard />
+        </AppLayout>
+      </AuthGuard>
     ),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/admin/customers",
     element: (
-      <AppLayout>
-        <Customers />
-      </AppLayout>
+      <AuthGuard allowedRoles={["admin"]}>
+        <AppLayout>
+          <Customers />
+        </AppLayout>
+      </AuthGuard>
     ),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/admin/schedule",
     element: (
-      <AppLayout container>
-        <Schedule />
-      </AppLayout>
+      <AuthGuard allowedRoles={["admin"]}>
+        <AppLayout container>
+          <Schedule />
+        </AppLayout>
+      </AuthGuard>
     ),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/admin/subs",
     element: (
-      <AppLayout>
-        <Subscriptions />
-      </AppLayout>
+      <AuthGuard allowedRoles={["admin"]}>
+        <AppLayout>
+          <Subscriptions />
+        </AppLayout>
+      </AuthGuard>
     ),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/admin/settings",
     element: (
-      <AppLayout container>
-        <Settings />
-      </AppLayout>
+      <AuthGuard allowedRoles={["admin"]}>
+        <AppLayout container>
+          <Settings />
+        </AppLayout>
+      </AuthGuard>
     ),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/tech",
     element: (
-      <JobQueue />
+      <AuthGuard allowedRoles={["tech"]}>
+        <JobQueue />
+      </AuthGuard>
     ),
     errorElement: <RouteErrorBoundary />,
   },

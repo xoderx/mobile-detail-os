@@ -1,7 +1,7 @@
 import React from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import {
-  Home,
+  User as UserIcon,
   Calendar,
   Users,
   Settings,
@@ -19,10 +19,17 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
+import { Badge } from "@/components/ui/badge";
+
 function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = useAuthStore(s => s.user);
+  const logout = useAuthStore(s => s.logout);
+
   const navItems = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/admin" },
     { label: "Schedule", icon: Calendar, path: "/admin/schedule" },
@@ -30,6 +37,12 @@ function AppSidebar() {
     { label: "Subscriptions", icon: CreditCard, path: "/admin/subs" },
     { label: "Settings", icon: Settings, path: "/admin/settings" },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <Sidebar className="border-r border-border">
       <SidebarHeader className="p-4">
@@ -58,7 +71,18 @@ function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4 border-t border-border">
-        <SidebarMenuButton className="w-full text-muted-foreground hover:text-foreground">
+        <div className="mb-4 px-2 py-3 rounded-lg bg-muted/30 border">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-6 w-6 rounded-full bg-brand-500 flex items-center justify-center text-[10px] text-white font-bold">
+              {user?.name?.[0] || 'A'}
+            </div>
+            <span className="text-xs font-bold truncate">{user?.name || 'Admin'}</span>
+          </div>
+          <Badge className="text-[9px] h-4 px-1.5 uppercase bg-brand-100 text-brand-700 hover:bg-brand-100 border-none">
+            {user?.role || 'User'}
+          </Badge>
+        </div>
+        <SidebarMenuButton onClick={handleLogout} className="w-full text-muted-foreground hover:text-foreground">
           <LogOut className="h-4 w-4 mr-2" />
           <span>Logout</span>
         </SidebarMenuButton>

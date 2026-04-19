@@ -43,7 +43,15 @@ export function PackageSelection() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {packages.map((pkg) => (
           <Card key={pkg.id} className={`relative flex flex-col transition-all duration-300 hover:shadow-xl ${pkg.popular ? 'border-brand-500 ring-1 ring-brand-500 scale-105' : 'border-border'}`}>
-            {pkg.popular && (
+            {pkg.id === 'ceramic' ? (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
+                Ceramic Protection Included
+              </div>
+            ) : pkg.id === 'basic' ? (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
+                Best Value
+              </div>
+            ) : pkg.popular && (
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
                 Most Popular
               </div>
@@ -73,6 +81,11 @@ export function PackageSelection() {
             </CardFooter>
           </Card>
         ))}
+      </div>
+      <div className="mt-12 p-6 bg-brand-50 rounded-2xl border border-brand-100 text-center">
+        <h4 className="font-bold text-brand-900 mb-1">Frequently Bought Together</h4>
+        <p className="text-xs text-brand-700 mb-3">Add Engine Detail + Odor Bomb for just <span className="font-bold">$65</span> (Save $9)</p>
+        <p className="text-[10px] text-brand-600/60 uppercase font-bold tracking-wider italic">Smart Suggestion</p>
       </div>
     </div>
   );

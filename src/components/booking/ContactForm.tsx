@@ -6,7 +6,8 @@ import { useBookingStore } from '@/store/booking-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, Loader2, Lock, CreditCard } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react';
 import { api } from '@/lib/api-client';
 const contactSchema = z.object({
   firstName: z.string().min(2, 'First name is required'),
@@ -18,6 +19,7 @@ const contactSchema = z.object({
 type ContactValues = z.infer<typeof contactSchema>;
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const setStep = useBookingStore(s => s.setStep);
   const setContact = useBookingStore(s => s.setContact);
   const vehicleSize = useBookingStore(s => s.vehicleSize);
@@ -34,8 +36,10 @@ export function ContactForm() {
     try {
       setContact(data);
       // Simulating Payment Processing Redirect / Session Creation
+      setIsRedirecting(true);
       await api('/api/payments/create-session', { method: 'POST' });
       // Simulate Stripe verification lag
+      await new Promise(r => setTimeout(r, 1500));
       await new Promise(r => setTimeout(r, 2000));
       await api('/api/bookings', {
         method: 'POST',
@@ -51,12 +55,28 @@ export function ContactForm() {
       });
       setStep(6);
     } catch (error) {
+      setIsRedirecting(false);
       console.error('Submission failed', error);
     } finally {
       setIsSubmitting(false);
     }
   };
   return (
+    <>
+    {isRedirecting && (
+      <div className="fixed inset-0 z-[100] bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-fade-in">
+        <div className="text-center space-y-6 max-w-sm px-4">
+          <div className="h-20 w-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto border-2 border-brand-200">
+             <Loader2 className="h-10 w-10 text-brand-600 animate-spin" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold">Redirecting to Stripe...</h3>
+            <p className="text-muted-foreground text-sm">We are opening a secure checkout session for your $20 deposit.</p>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest"><ShieldCheck className="h-4 w-4" /> PCI Compliant</div>
+        </div>
+      </div>
+    )}
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="sm" onClick={() => setStep(4)} className="-ml-2">
@@ -127,5 +147,6 @@ export function ContactForm() {
         </div>
       </form>
     </div>
+    </>
   );
 }

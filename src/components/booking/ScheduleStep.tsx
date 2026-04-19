@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { ChevronLeft, Clock, Info } from 'lucide-react';
 import { addDays, format, isBefore, startOfToday } from 'date-fns';
+import { WeatherBanner } from './WeatherBanner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 const timeSlots = [
   { id: 'morning', label: 'Morning', window: '8:00 AM - 12:00 PM', icon: '☀️' },
@@ -14,6 +15,7 @@ export function ScheduleStep() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const setStep = useBookingStore(s => s.setStep);
+  const currentDateTime = useBookingStore(s => s.dateTime);
   const setDateTime = useBookingStore(s => s.setDateTime);
   const handleContinue = () => {
     if (selectedDate && selectedSlot) {
@@ -51,6 +53,11 @@ export function ScheduleStep() {
           </div>
         </div>
         <div className="space-y-4">
+          <div className="mb-4 h-24">
+            {selectedDate && (
+              <WeatherBanner date={selectedDate.toISOString()} />
+            )}
+          </div>
           <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Select Arrival Window</label>
           <div className="space-y-3">
             {!selectedDate ? (
