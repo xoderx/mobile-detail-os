@@ -83,7 +83,7 @@ function runSetupCommands() {
     "bun add @stripe/react-stripe-js@^2.7.3",
     "bun add @stripe/stripe-js @stripe/react-stripe-js stripe",
     "bun add zustand",
-    "bun add lucide-react clsx tailwind-merge"
+    "bun add lucide-react clsx tailwind-merge zustand"
 ];
     
     if (commands.length === 0) {
