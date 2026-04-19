@@ -1,18 +1,15 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { CustomerEntity, BookingEntity, SubscriptionEntity } from "./entities";
-import { ok, bad } from './core-utils';
+import { ok, bad, notFound } from './core-utils';
 import { addDays, format } from 'date-fns';
-
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/test', (c) => c.json({ success: true, data: { name: 'DetailFlow OS API' }}));
-  
   // AUTH
   app.post('/api/auth/login', async (c) => {
     const { role } = await c.req.json();
     return ok(c, { id: crypto.randomUUID(), name: 'User Name', role, email: 'user@example.com' });
   });
-
   // WEATHER
   app.get('/api/weather', (c) => {
     const forecasts = Array.from({ length: 30 }).map((_, i) => ({
@@ -22,8 +19,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }));
     return ok(c, forecasts);
   });
-
-  // STATS / ANALYTICS
+  // STATS
   app.get('/api/stats', async (c) => {
     const bookings = await BookingEntity.list(c.env);
     const customers = await CustomerEntity.list(c.env);
@@ -37,27 +33,30 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       customerCount: customers.items.length,
       subscriptionCount: subs.items.filter(s => s.status === 'active').length,
       satisfactionScore: 4.9,
-      weatherForecast: {
-        condition: 'Partly Cloudy',
-        riskLevel: 'Low'
-      }
     });
-  });
-  // CUSTOMERS
-  app.get('/api/customers', async (c) => {
-    await CustomerEntity.ensureSeed(c.env);
-    const page = await CustomerEntity.list(c.env);
-    return ok(c, page);
   });
   // BOOKINGS
   app.get('/api/bookings', async (c) => {
     await BookingEntity.ensureSeed(c.env);
     const techId = c.req.query('technicianId');
+    const customerId = c.req.query('customerId');
     const page = await BookingEntity.list(c.env);
-    if (techId) {
-      return ok(c, { items: page.items.filter(b => b.technicianId === techId), next: page.next });
-    }
-    return ok(c, page);
+    let filtered = page.items;
+    if (techId) filtered = filtered.filter(b => b.technicianId === techId);
+    if (customerId) filtered = filtered.filter(b => b.customerId === customerId);
+    return ok(c, { items: filtered, next: page.next });
+  });
+  app.get('/api/bookings/:id', async (c) => {
+    const id = c.req.param('id');
+    const entity = new BookingEntity(c.env, id);
+    const state = await entity.getState();
+    if (!state.id) return notFound(c, 'Booking not found');
+    // Enrich with mock customer data for detail view
+    return ok(c, {
+      ...state,
+      contact: { firstName: 'Demo', lastName: 'Customer', phone: '555-0199', address: '123 Detail Lane' },
+      location: '123 Customer Address, Suite 100'
+    });
   });
   app.post('/api/bookings', async (c) => {
     const data = (await c.req.json()) as any;
@@ -75,15 +74,22 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await entity.patch({ status: status as any });
     return ok(c, { id, status });
   });
-  // SUBSCRIPTIONS
+  app.post('/api/bookings/:id/assign', async (c) => {
+    const id = c.req.param('id');
+    const { technicianId } = (await c.req.json()) as { technicianId: string };
+    const entity = new BookingEntity(c.env, id);
+    await entity.patch({ technicianId });
+    return ok(c, { id, technicianId });
+  });
+  // CUSTOMERS & SUBSCRIPTIONS (Simplified list)
+  app.get('/api/customers', async (c) => {
+    await CustomerEntity.ensureSeed(c.env);
+    return ok(c, await CustomerEntity.list(c.env));
+  });
   app.get('/api/subscriptions', async (c) => {
     await SubscriptionEntity.ensureSeed(c.env);
-    const page = await SubscriptionEntity.list(c.env);
-    return ok(c, page);
+    return ok(c, await SubscriptionEntity.list(c.env));
   });
   // PAYMENTS MOCK
-  app.post('/api/payments/create-session', async (c) => {
-    // Simulating Stripe Checkout Session creation
-    return ok(c, { sessionId: 'mock_session_' + crypto.randomUUID(), url: '#' });
-  });
+  app.post('/api/payments/create-session', async (c) => ok(c, { url: '#' }));
 }
