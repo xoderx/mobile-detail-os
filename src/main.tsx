@@ -15,6 +15,8 @@ import { HomePage } from '@/pages/HomePage'
 import { BookingWizard } from '@/pages/booking/BookingWizard'
 import { Dashboard } from '@/pages/admin/Dashboard'
 import Customers from '@/pages/admin/Customers'
+import Schedule from '@/pages/admin/Schedule'
+import JobQueue from '@/pages/tech/JobQueue'
 import { AppLayout } from '@/components/layout/AppLayout'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -50,11 +52,18 @@ const router = createBrowserRouter([
     path: "/admin/schedule",
     element: (
       <AppLayout container>
-        <div className="p-8">Schedule View (Coming Soon)</div>
+        <Schedule />
       </AppLayout>
     ),
     errorElement: <RouteErrorBoundary />,
-  }
+  },
+  {
+    path: "/tech",
+    element: (
+      <JobQueue />
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
 ]);
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,5 +1,26 @@
 import { create } from 'zustand';
 export type VehicleSize = 'sedan' | 'suv' | 'truck' | 'luxury';
+export const PRICING = {
+  VEHICLE: {
+    sedan: 0,
+    suv: 20,
+    truck: 40,
+    luxury: 60
+  },
+  PACKAGES: {
+    basic: 89,
+    premium: 149,
+    ceramic: 299
+  },
+  ADD_ONS: {
+    engine: 49,
+    pet: 30,
+    headlight: 60,
+    odor: 25,
+    'ceramic-boost': 40,
+    'clay-bar': 50
+  }
+};
 export interface BookingState {
   step: number;
   vehicleSize: VehicleSize | null;
@@ -19,6 +40,7 @@ export interface BookingState {
   toggleAddOn: (id: string) => void;
   setDateTime: (dateTime: string) => void;
   setContact: (contact: Partial<BookingState['contact']>) => void;
+  getTotalPrice: () => number;
   reset: () => void;
 }
 const initialContact = {
@@ -28,7 +50,7 @@ const initialContact = {
   phone: '',
   address: '',
 };
-export const useBookingStore = create<BookingState>((set) => ({
+export const useBookingStore = create<BookingState>((set, get) => ({
   step: 1,
   vehicleSize: null,
   packageId: null,
@@ -44,9 +66,25 @@ export const useBookingStore = create<BookingState>((set) => ({
       : [...state.addOns, id],
   })),
   setDateTime: (dateTime) => set({ dateTime, step: 5 }),
-  setContact: (contact) => set((state) => ({ 
-    contact: { ...state.contact, ...contact } 
+  setContact: (contact) => set((state) => ({
+    contact: { ...state.contact, ...contact }
   })),
+  getTotalPrice: () => {
+    const { vehicleSize, packageId, addOns } = get();
+    let total = 0;
+    if (packageId && packageId in PRICING.PACKAGES) {
+      total += PRICING.PACKAGES[packageId as keyof typeof PRICING.PACKAGES];
+    }
+    if (vehicleSize && vehicleSize in PRICING.VEHICLE) {
+      total += PRICING.VEHICLE[vehicleSize];
+    }
+    addOns.forEach(id => {
+      if (id in PRICING.ADD_ONS) {
+        total += PRICING.ADD_ONS[id as keyof typeof PRICING.ADD_ONS];
+      }
+    });
+    return total;
+  },
   reset: () => set({
     step: 1,
     vehicleSize: null,
