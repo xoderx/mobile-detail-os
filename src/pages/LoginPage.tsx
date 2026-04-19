@@ -32,10 +32,10 @@ export function LoginPage() {
           <Card className="border-2 shadow-xl">
             <CardHeader className="text-center space-y-2">
               <div className="mx-auto h-12 w-12 rounded-xl bg-brand-500 flex items-center justify-center text-white mb-2">
-                <Lock className="h-6 w-6" />
+                <Shield className="h-6 w-6" />
               </div>
-              <CardTitle className="text-2xl font-bold">Portal Access</CardTitle>
-              <CardDescription>Select your role to access the DetailFlow OS</CardDescription>
+              <CardTitle className="text-2xl font-bold">Detail Deluxe Access</CardTitle>
+              <CardDescription>Choose your portal to manage your experience.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 p-6">
               <Button

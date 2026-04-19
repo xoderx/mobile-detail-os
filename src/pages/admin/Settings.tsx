@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Globe, Palette, Eye, ShieldCheck, Lock, Activity, Server, Loader2, Sparkles, MessageSquare
+  Globe, Palette, Eye, ShieldCheck, Lock, Activity, Server, Loader2, Sparkles, MessageSquare, Users
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 export default function Settings() {
   const queryClient = useQueryClient();
   const [previewScale, setPreviewScale] = useState(1);
@@ -36,7 +37,7 @@ export default function Settings() {
     <div className="space-y-8 animate-fade-in pb-20">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Business Command Center</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Detail Deluxe Control</h1>
           <p className="text-muted-foreground">Manage brand, site content, and system security.</p>
         </div>
         <div className="flex gap-2">
@@ -64,6 +65,11 @@ export default function Settings() {
                   <CardTitle>Brand Identity</CardTitle>
                   <CardDescription>Configure your visual presence across all portals.</CardDescription>
                 </CardHeader>
+                <CardContent className="pb-6">
+                  <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                    <Link to="/admin/users"><Users className="h-4 w-4" /> Manage Administrative Access</Link>
+                  </Button>
+                </CardContent>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">

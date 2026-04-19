@@ -3,11 +3,15 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
+export type UserRole = 'admin' | 'tech' | 'customer';
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'tech' | 'customer';
+  role: UserRole;
+  phoneNumber?: string;
+  isActive: boolean;
+  createdAt: number;
 }
 export type VehicleSize = 'sedan' | 'suv' | 'truck' | 'luxury';
 export interface FeatureItem {
