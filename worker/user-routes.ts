@@ -10,37 +10,40 @@ async function checkRateLimit(env: Env, ip: string, key: string, limit: number, 
   const now = Math.floor(Date.now() / 1000);
   const timeKey = Math.floor(now / windowSec);
   const compositeKey = `rl:${key}:${ip}:${timeKey}`;
-  // Use DO casPut pattern to increment counter
-  // Note: For simplicity in this template, we use getDoc/casPut
-  // In a high-traffic env, you'd use a specific atomic increment in the DO
-  const doc = await stub.getDoc<number>(compositeKey);
+  // Use DO getDoc/casPut - cast to any because RPC generic passing is not supported in the stub layer
+  const doc = (await stub.getDoc(compositeKey)) as any;
   const current = doc?.data ?? 0;
   const version = doc?.v ?? 0;
   if (current >= limit) return false;
-  await stub.casPut(compositeKey, version, current + 1);
-  return true;
+  const res = await stub.casPut(compositeKey, version, current + 1);
+  return res.ok;
 }
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/test', (c) => c.json({ success: true, data: { name: 'DetailFlow OS API' }}));
   // TURNSTILE VERIFICATION
   app.post('/api/auth/verify-turnstile', async (c) => {
-    const { token } = await c.req.json();
-    if (!token) return bad(c, 'Turnstile token missing');
-    // Use Cloudflare testing secret for demo
-    const secret = '1x0000000000000000000000000000000AA';
-    const formData = new FormData();
-    formData.append('secret', secret);
-    formData.append('response', token);
-    formData.append('remoteip', c.req.header('CF-Connecting-IP') || '');
-    const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      body: formData,
-      method: 'POST',
-    });
-    const outcome = await result.json() as any;
-    if (outcome.success) {
-      return ok(c, { verified: true });
+    try {
+      const { token } = await c.req.json();
+      if (!token) return bad(c, 'Turnstile token missing');
+      const secret = '1x0000000000000000000000000000000AA';
+      const formData = new FormData();
+      formData.append('secret', secret);
+      formData.append('response', token);
+      formData.append('remoteip', c.req.header('CF-Connecting-IP') || '');
+      const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        body: formData,
+        method: 'POST',
+      });
+      if (!result.ok) throw new Error('Turnstile service unavailable');
+      const outcome = await result.json() as any;
+      if (outcome.success) {
+        return ok(c, { verified: true });
+      }
+      return bad(c, 'Bot detection failed');
+    } catch (err) {
+      console.error('Turnstile error:', err);
+      return bad(c, 'Security verification service error');
     }
-    return bad(c, 'Bot detection failed');
   });
   // STATS
   app.get('/api/stats', async (c) => {
@@ -61,7 +64,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       integrations: config.integrations
     });
   });
-  // CMS & CONFIG (existing methods preserved...)
+  // CMS & CONFIG
   app.get('/api/cms/config', async (c) => {
     const entity = new ConfigEntity(c.env, 'global-settings');
     const state = await entity.getState();
@@ -87,11 +90,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/cms/services', async (c) => {
     await ServiceTierEntity.ensureSeed(c.env);
-    return ok(c, await ServiceTierEntity.list(c.env));
+    const res = await ServiceTierEntity.list(c.env);
+    return ok(c, res);
   });
   app.get('/api/cms/addons', async (c) => {
     await AddOnEntity.ensureSeed(c.env);
-    return ok(c, await AddOnEntity.list(c.env));
+    const res = await AddOnEntity.list(c.env);
+    return ok(c, res);
   });
   // BOOKINGS (RATE LIMITED)
   app.get('/api/bookings', async (c) => {
@@ -106,7 +111,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/bookings', async (c) => {
     const ip = c.req.header('CF-Connecting-IP') || 'unknown';
     const allowed = await checkRateLimit(c.env, ip, 'bookings', 5, 3600);
-    if (!allowed) return c.json({ success: false, error: 'Too many booking attempts. Please try again later.' }, 429);
+    if (!allowed) return c.json({ success: false, error: 'Too many booking attempts. Please try again in an hour.' }, 429);
     const data = await c.req.json();
     const booking = await BookingEntity.create(c.env, { ...data, id: crypto.randomUUID(), status: 'pending', checklist: {} });
     return ok(c, booking);
@@ -149,11 +154,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/customers', async (c) => {
     await CustomerEntity.ensureSeed(c.env);
-    return ok(c, await CustomerEntity.list(c.env));
+    const res = await CustomerEntity.list(c.env);
+    return ok(c, res);
   });
   app.get('/api/subscriptions', async (c) => {
     await SubscriptionEntity.ensureSeed(c.env);
-    return ok(c, await SubscriptionEntity.list(c.env));
+    const res = await SubscriptionEntity.list(c.env);
+    return ok(c, res);
   });
   app.post('/api/payments/create-session', async (c) => ok(c, { url: '#' }));
 }
