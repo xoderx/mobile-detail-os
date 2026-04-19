@@ -7,7 +7,8 @@ import {
   Settings,
   CreditCard,
   LogOut,
-  LayoutDashboard
+  LayoutDashboard,
+  UserCog
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +35,7 @@ function AppSidebar() {
     { label: "Dashboard", icon: LayoutDashboard, path: "/admin" },
     { label: "Schedule", icon: Calendar, path: "/admin/schedule" },
     { label: "Customers", icon: Users, path: "/admin/customers" },
+    { label: "Team & Users", icon: UserCog, path: "/admin/users" },
     { label: "Subscriptions", icon: CreditCard, path: "/admin/subs" },
     { label: "Settings", icon: Settings, path: "/admin/settings" },
   ];
@@ -47,8 +49,8 @@ function AppSidebar() {
     <Sidebar className="border-r border-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold">D</div>
-          <span className="text-lg font-bold tracking-tight">DetailFlow</span>
+          <div className="h-8 w-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold">DX</div>
+          <span className="text-lg font-bold tracking-tight">Detail Deluxe</span>
         </div>
       </SidebarHeader>
       <SidebarContent>

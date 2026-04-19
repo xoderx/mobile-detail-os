@@ -1,5 +1,5 @@
 import { IndexedEntity } from "./core-utils";
-import type { ServiceTier, AddOn, AppConfig } from "@shared/types";
+import type { ServiceTier, AddOn, AppConfig, User } from "@shared/types";
 export interface Customer {
   id: string;
   firstName: string;
@@ -65,6 +65,21 @@ export class AddOnEntity extends IndexedEntity<AddOn> {
     { id: 'headlight', name: 'Headlight Restoration', price: 60, description: 'Restore clarity to fogged headlights.' },
   ];
 }
+
+export class UserAccountEntity extends IndexedEntity<User> {
+  static readonly entityName = "user-account";
+  static readonly indexName = "user-accounts";
+  static readonly initialState: User = { 
+    id: "", name: "", email: "", role: "customer", isActive: true, createdAt: 0 
+  };
+  static seedData: User[] = [
+    { id: "admin-1", name: "System Admin", email: "admin@detaildeluxe.com", role: "admin", isActive: true, createdAt: Date.now() },
+    { id: "tech-1", name: "James Wilson", email: "james@detaildeluxe.com", role: "tech", isActive: true, createdAt: Date.now() },
+    { id: "tech-2", name: "Sarah Miller", email: "sarah@detaildeluxe.com", role: "tech", isActive: true, createdAt: Date.now() },
+    { id: "cust-1", name: "Demo Customer", email: "customer@gmail.com", role: "customer", isActive: true, createdAt: Date.now() },
+  ];
+}
+
 export class ConfigEntity extends IndexedEntity<AppConfig> {
   static readonly entityName = "config";
   static readonly indexName = "configs";

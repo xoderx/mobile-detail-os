@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
-import { CustomerEntity, BookingEntity, SubscriptionEntity, ServiceTierEntity, AddOnEntity, ConfigEntity } from "./entities";
+import { CustomerEntity, BookingEntity, SubscriptionEntity, ServiceTierEntity, AddOnEntity, ConfigEntity, UserAccountEntity } from "./entities";
 import { ok, bad, notFound } from './core-utils';
 import { addDays, format } from 'date-fns';
 // RATE LIMITER HELPER (DO BACKED)
@@ -19,7 +19,7 @@ async function checkRateLimit(env: Env, ip: string, key: string, limit: number, 
   return res.ok;
 }
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/test', (c) => c.json({ success: true, data: { name: 'DetailFlow OS API' }}));
+  app.get('/api/test', (c) => c.json({ success: true, data: { name: 'Detail Deluxe API' }}));
   // TURNSTILE VERIFICATION
   app.post('/api/auth/verify-turnstile', async (c) => {
     try {
@@ -163,4 +163,33 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, res);
   });
   app.post('/api/payments/create-session', async (c) => ok(c, { url: '#' }));
+
+  // USER MANAGEMENT
+  app.get('/api/users', async (c) => {
+    await UserAccountEntity.ensureSeed(c.env);
+    const res = await UserAccountEntity.list(c.env);
+    return ok(c, res);
+  });
+  app.post('/api/users', async (c) => {
+    const data = await c.req.json();
+    const user = await UserAccountEntity.create(c.env, {
+      ...data,
+      id: data.id || crypto.randomUUID(),
+      createdAt: Date.now(),
+      isActive: true
+    });
+    return ok(c, user);
+  });
+  app.put('/api/users/:id', async (c) => {
+    const id = c.req.param('id');
+    const data = await c.req.json();
+    const entity = new UserAccountEntity(c.env, id);
+    await entity.patch(data);
+    return ok(c, await entity.getState());
+  });
+  app.delete('/api/users/:id', async (c) => {
+    const id = c.req.param('id');
+    const existed = await UserAccountEntity.delete(c.env, id);
+    return ok(c, { deleted: existed });
+  });
 }

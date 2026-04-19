@@ -34,8 +34,8 @@ export function HomePage() {
       <ThemeToggle />
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold" style={{ backgroundColor: 'var(--primary-brand)' }}>D</div>
-          <span className="text-xl font-bold tracking-tight">DetailFlow OS</span>
+          <div className="h-8 w-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold" style={{ backgroundColor: 'var(--primary-brand)' }}>DX</div>
+          <span className="text-xl font-bold tracking-tight">Detail Deluxe</span>
         </div>
         <div className="hidden md:flex items-center gap-8">
           <a href="#services" className="text-sm font-medium hover:text-brand-500 transition-colors">Services</a>
@@ -79,14 +79,14 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 text-xs font-bold mb-8 animate-fade-in shadow-sm border">
             <Star className="h-3 w-3 fill-current text-amber-500" />
-            <span>PREMIUM AUTO CARE ON DEMAND</span>
+            <span>LUXURY AUTO CARE REIMAGINED</span>
           </div>
           <h1 className="text-5xl md:text-8xl font-display font-bold text-foreground mb-6 tracking-tight leading-[1.05]">
             Showroom Quality Car Detailing <br />
-            <span className="text-brand-500" style={{ color: 'var(--primary-brand)' }}>powered by DetailFlow OS</span>
+            <span className="text-brand-500" style={{ color: 'var(--primary-brand)' }}>at your doorstep.</span>
           </h1>
           <p className="text-lg md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-12 text-pretty leading-relaxed">
-            Transform your vehicle with our premium mobile services powered by DetailFlow OS.
+            Experience the ultimate in mobile automotive rejuvenation with Detail Deluxe.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg" className="h-14 px-10 text-xl font-bold shadow-xl hover:scale-105 transition-transform" style={{ background: `linear-gradient(135deg, var(--gradient-start), var(--gradient-end))` }}>
@@ -127,8 +127,8 @@ export function HomePage() {
           </div>
         </div>
       </section>
-      <footer className="py-16 bg-slate-900/20 border-t text-center space-y-8">
-        <div className="font-bold text-4xl tracking-tighter" style={{ color: 'var(--primary-brand)' }}>DetailFlow OS</div>
+      <footer className="py-16 bg-slate-900/10 border-t text-center space-y-8">
+        <div className="font-bold text-4xl tracking-tighter uppercase" style={{ color: 'var(--primary-brand)' }}>Detail Deluxe</div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm max-w-4xl mx-auto">
           <div>
             <h4 className="font-bold mb-4 text-foreground">Services</h4>
@@ -163,7 +163,7 @@ export function HomePage() {
             </div>
           </div>
         </div>
-        <p className="text-muted-foreground text-sm border-t pt-8">&copy; 2024 DetailFlow OS. All rights reserved.</p>
+        <p className="text-muted-foreground text-sm border-t pt-8">&copy; 2025 Detail Deluxe. All rights reserved.</p>
       </footer>
     </div>
   );

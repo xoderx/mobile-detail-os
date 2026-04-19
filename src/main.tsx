@@ -21,6 +21,7 @@ import Schedule from '@/pages/admin/Schedule'
 import Subscriptions from '@/pages/admin/Subscriptions'
 import Settings from '@/pages/admin/Settings'
 import JobQueue from '@/pages/tech/JobQueue'
+import Users from '@/pages/admin/Users'
 import JobDetails from '@/pages/tech/JobDetails'
 import MyBookings from '@/pages/customer/MyBookings'
 import { AppLayout } from '@/components/layout/AppLayout'
@@ -67,6 +68,17 @@ const router = createBrowserRouter([
       <AuthGuard allowedRoles={["admin"]}>
         <AppLayout container>
           <Customers />
+        </AppLayout>
+      </AuthGuard>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin/users",
+    element: (
+      <AuthGuard allowedRoles={["admin"]}>
+        <AppLayout container>
+          <Users />
         </AppLayout>
       </AuthGuard>
     ),
