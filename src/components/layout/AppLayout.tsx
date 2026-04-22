@@ -45,7 +45,7 @@ function AppSidebar() {
     <Sidebar className="border-r-2 border-sidebar-border/50 bg-sidebar/50 backdrop-blur-md">
       <SidebarHeader className="p-8">
         <div className="flex items-center gap-3">
-          <img src={LOGO_BASE64} alt={BRAND_SHORT_NAME} className="h-8 w-8 animate-shimmer" />
+          <img src={LOGO_BASE64} alt={BRAND_SHORT_NAME} className="h-12 w-12 animate-shimmer" />
           <span className="text-xl font-black tracking-tighter uppercase text-shimmer">{BRAND_SHORT_NAME}</span>
         </div>
       </SidebarHeader>
