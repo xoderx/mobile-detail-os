@@ -20,13 +20,13 @@ export default {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			brand: {
-  				50: '#f0f9ff',
+  				50: '#f0faff',
   				100: '#e0f2fe',
   				200: '#bae6fd',
   				300: '#7dd3fc',
   				400: '#38bdf8',
-  				500: '#1E90FF', // Icy Blue
-  				600: '#00BFFF', // Cyan Glow
+  				500: '#00BFFF', // Deep Sky Blue
+  				600: '#1E90FF', // Dodger Blue
   				700: '#4682B4', // Steel Blue
   				800: '#075985',
   				900: '#0c4a6e',
