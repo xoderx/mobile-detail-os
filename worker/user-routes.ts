@@ -110,13 +110,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, { items, next: page.next });
   });
   app.post('/api/bookings', async (c) => {
-    const data = await c.req.json();
-    const booking = await BookingEntity.create(c.env, {
-      ...data,
-      id: crypto.randomUUID(),
-      status: 'pending',
-      checklist: {}
-    });
+    const {customerId, vehicleSize, packageId, addOns=[], dateTime, contact, totalPrice, turnstileToken} = await c.req.json();
+    if (!vehicleSize || !packageId || !dateTime || !contact?.firstName || !contact?.lastName || !contact?.email || !contact?.phone || !contact?.address || !turnstileToken || totalPrice <= 0) return bad(c, 'Missing or invalid required booking details (vehicle, package, date, contact, token, price)');
+    const booking = await BookingEntity.create(c.env, {customerId, vehicleSize, packageId, addOns: addOns || [], dateTime, totalPrice, turnstileToken, contact, id: crypto.randomUUID(), status: 'pending', checklist: {} });
     return ok(c, booking);
   });
   app.get('/api/bookings/:id', async (c) => {
@@ -152,6 +148,4 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     condition: i % 3 === 0 ? 'Cloudy' : 'Sunny', 
     temp: 70 + i 
   }))));
-}
-// Helper imports for weather date formatting
 import { format, addDays } from "date-fns";

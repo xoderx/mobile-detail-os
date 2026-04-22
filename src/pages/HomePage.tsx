@@ -75,7 +75,46 @@ export function HomePage() {
           </SheetContent>
         </Sheet>
       </nav>
-      <section className="relative pt-24 pb-32 lg:pt-48 lg:pb-56">
+      <section className="relative pt-24 pb-32 lg:pt-48 lg:pb-56 bg-gradient-to-br from-slate-900/50 via-blue-900/20 to-indigo-900/80 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Car silhouette SVG */}
+          <svg viewBox="0 0 400 300" preserveAspectRatio="none" className="w-3/4 h-3/4 bottom-0 right-0 opacity-20 translate-x-20 -translate-y-20 scale-110 absolute">
+            <defs>
+              <linearGradient id="metallic" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#e0e0e0"/>
+                <stop offset="25%" stopColor="#a0a0a0"/>
+                <stop offset="50%" stopColor="#00bfff"/>
+                <stop offset="100%" stopColor="#808080"/>
+              </linearGradient>
+              <radialGradient id="iceGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#00ffff" stopOpacity="0.3"/>
+                <stop offset="70%" stopColor="#00bfff" stopOpacity="0.1"/>
+                <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
+              </radialGradient>
+            </defs>
+            {/* Car body */}
+            <path d="M50 150 Q100 120 200 120 Q300 120 350 150 L350 220 Q300 240 200 240 Q100 240 50 220 Z" fill="url(#iceGlow)" stroke="url(#metallic)" strokeWidth="3" strokeLinecap="round"/>
+            {/* Roof */}
+            <path d="M80 130 Q150 100 250 130" fill="none" stroke="url(#metallic)" strokeWidth="4" strokeLinecap="round"/>
+            {/* Windows */}
+            <path d="M100 135 Q130 125 160 135 Q190 145 220 135 Q250 125 280 135" fill="none" stroke="#00bfff" strokeWidth="1.5" strokeDasharray="3,3"/>
+            {/* Wheels */}
+            <circle cx="100" cy="235" r="18" fill="#333" stroke="url(#metallic)" strokeWidth="2"/>
+            <circle cx="300" cy="235" r="18" fill="#333" stroke="url(#metallic)" strokeWidth="2"/>
+            {/* Ice cracks on car */}
+            <path d="M120 140 L130 130 M160 135 L170 125 M200 145 L210 135 M240 130 L250 120" stroke="#00ffff" strokeWidth="1" strokeLinecap="round" strokeDasharray="2,2"/>
+          </svg>
+          {/* Ice cracks background */}
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full opacity-10 mix-blend-soft-light absolute">
+            <defs>
+              <pattern id="iceCracks" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <path d="M10 20 L15 10 M30 40 L35 30 M50 60 L55 50 M70 25 L75 15 M85 70 L90 60 M20 80 L25 70 M40 15 L45 5" stroke="#00bfff" strokeWidth="0.5" strokeLinecap="round" opacity="0.6"/>
+                <path d="M60 30 L65 20 M80 50 L85 40 M15 55 L20 45 M45 75 L50 65 M25 35 L30 25 M90 80 L95 70" stroke="#00ffff" strokeWidth="0.4" strokeLinecap="round" opacity="0.4"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#iceCracks)"/>
+          </svg>
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="text-left">
