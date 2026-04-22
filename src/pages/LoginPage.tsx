@@ -3,16 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Hammer, User as UserIcon } from 'lucide-react';
+import { Shield, Hammer, User as UserIcon, Snowflake } from 'lucide-react';
 import { motion } from 'framer-motion';
+const LOGO_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY7NDkBAFIWnL6UoWfFndm7szm9jY2f9XIsomfU6Oje85fSce78AIEZTo8HWBGfFzPImRkdXV6pG9AByDAm50rUe1yV8FshWAsmYq9v1U2A2mD8tYFpZ/6y/668pXUv6LNAshZJx67vAaiB/XMC0sv6OvxPshSREvGReSjr6vAtshLREvGRedLzI95AdEJYIH5kvOT/kfMhOxEvGRS5X6M6M+AaxH8IKscAUEC30L6I/hBXigYknWuhfRH8IK8QDE0+00L+I/hBWiwZ6p+u8AOKF/UX0h7BOPLD3RAv9S+9A+vK76H5X96B7L3XvX+X65f6N7o8Y+P4IAAAAOGVYSWZNTQAqAAAACAAHAQYAAwAAAAEAAQAAAREABAAAAAEAAABAAREQAEAAAAAEAAAAUAAAAABBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykAAAADAAAABwAAAAEAAA== ";
 export function LoginPage() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
   const handleQuickLogin = (role: 'admin' | 'tech' | 'customer') => {
     const mockUser = {
       id: role === 'admin' ? 'admin-1' : role === 'tech' ? 'tech-1' : 'cust-1',
-      name: role === 'admin' ? 'Admin User' : role === 'tech' ? 'James Tech' : 'Demo Customer',
-      email: `${role}@detaildeluxe.com`,
+      name: role === 'admin' ? 'System Administrator' : role === 'tech' ? 'Lead Technician' : 'Elite Member',
+      email: `${role}@stonecold.com`,
       role,
     };
     login(mockUser);
@@ -21,71 +22,72 @@ export function LoginPage() {
     else navigate('/my-bookings');
   };
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="py-8 md:py-10 lg:py-12 min-h-[80vh] flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          <Card className="border-2 shadow-2xl rounded-3xl overflow-hidden">
-            <CardHeader className="text-center space-y-2 bg-slate-50 border-b py-8">
-              <div className="mx-auto h-16 w-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white mb-2 shadow-lg shadow-brand-500/20">
-                <Shield className="h-8 w-8" />
+    <div className="max-w-7xl mx-auto px-4 min-h-screen flex items-center justify-center relative bg-background">
+      <div className="absolute inset-0 ice-crack-pattern opacity-[0.05] pointer-events-none" />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full max-w-md relative z-10"
+      >
+        <Card className="border-border/50 shadow-2xl rounded-[2.5rem] overflow-hidden glass-ice">
+          <CardHeader className="text-center space-y-4 py-12 border-b border-border/20 bg-muted/30">
+            <div className="mx-auto h-20 w-20 rounded-3xl bg-primary flex items-center justify-center text-white mb-2 shadow-[0_0_30px_rgba(30,144,255,0.4)] animate-shimmer relative">
+              <img src={LOGO_BASE64} alt="Stone Cold" className="h-10 w-10 brightness-200" />
+            </div>
+            <CardTitle className="text-3xl font-black tracking-tighter uppercase text-shimmer">Stone Cold Ops</CardTitle>
+            <CardDescription className="font-bold text-muted-foreground/80">AUTHENTICATE TO ACCESS COMMAND PORTALS</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 p-10">
+            <Button
+              onClick={() => handleQuickLogin('admin')}
+              variant="outline"
+              className="w-full h-20 justify-start gap-5 hover:border-primary hover:bg-primary/5 group transition-all rounded-2xl border-border/30"
+            >
+              <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                <Shield className="h-6 w-6" />
               </div>
-              <CardTitle className="text-2xl font-bold tracking-tight">Detail Deluxe Access</CardTitle>
-              <CardDescription>Select your portal to continue.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 p-8">
-              <Button
-                onClick={() => handleQuickLogin('admin')}
-                variant="outline"
-                className="w-full h-16 justify-start gap-4 hover:border-brand-500 hover:bg-brand-50 group transition-all rounded-xl"
-              >
-                <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
-                  <Shield className="h-5 w-5 text-slate-600 group-hover:text-brand-600" />
-                </div>
-                <div className="text-left">
-                  <div className="font-bold">Admin Portal</div>
-                  <div className="text-xs text-muted-foreground">Operations & Finance</div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => handleQuickLogin('tech')}
-                variant="outline"
-                className="w-full h-16 justify-start gap-4 hover:border-brand-500 hover:bg-brand-50 group transition-all rounded-xl"
-              >
-                <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
-                  <Hammer className="h-5 w-5 text-slate-600 group-hover:text-brand-600" />
-                </div>
-                <div className="text-left">
-                  <div className="font-bold">Technician View</div>
-                  <div className="text-xs text-muted-foreground">Route & Job Management</div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => handleQuickLogin('customer')}
-                variant="outline"
-                className="w-full h-16 justify-start gap-4 hover:border-brand-500 hover:bg-brand-50 group transition-all rounded-xl"
-              >
-                <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
-                  <UserIcon className="h-5 w-5 text-slate-600 group-hover:text-brand-600" />
-                </div>
-                <div className="text-left">
-                  <div className="font-bold">Customer Portal</div>
-                  <div className="text-xs text-muted-foreground">My Bookings & Profile</div>
-                </div>
-              </Button>
-              <div className="pt-6 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                  Demo Environment Only
-                </p>
+              <div className="text-left">
+                <div className="font-black text-sm uppercase tracking-wider">COMMAND CENTER</div>
+                <div className="text-xs text-muted-foreground font-medium">Business Administration</div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+            </Button>
+            <Button
+              onClick={() => handleQuickLogin('tech')}
+              variant="outline"
+              className="w-full h-20 justify-start gap-5 hover:border-primary hover:bg-primary/5 group transition-all rounded-2xl border-border/30"
+            >
+              <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                <Hammer className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <div className="font-black text-sm uppercase tracking-wider">ARCTIC FIELD OPS</div>
+                <div className="text-xs text-muted-foreground font-medium">Technician Dispatch & Workflow</div>
+              </div>
+            </Button>
+            <Button
+              onClick={() => handleQuickLogin('customer')}
+              variant="outline"
+              className="w-full h-20 justify-start gap-5 hover:border-primary hover:bg-primary/5 group transition-all rounded-2xl border-border/30"
+            >
+              <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                <UserIcon className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <div className="font-black text-sm uppercase tracking-wider">ELITE MEMBER PORTAL</div>
+                <div className="text-xs text-muted-foreground font-medium">Personal Vehicle Vault</div>
+              </div>
+            </Button>
+            <div className="pt-8 text-center">
+              <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                <Snowflake className="h-3 w-3 animate-crackle" />
+                SECURE ARCTIC ENCRYPTION ACTIVE
+                <Snowflake className="h-3 w-3 animate-crackle" />
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

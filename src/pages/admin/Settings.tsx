@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Globe, Palette, Eye, ShieldCheck, Lock, Activity, Server, Loader2, Sparkles, MessageSquare, Users
+  Globe, Palette, Eye, ShieldCheck, Lock, Activity, Server, Loader2, Sparkles, MessageSquare, Users, Snowflake
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
@@ -23,182 +23,148 @@ export default function Settings() {
     mutationFn: (data: any) => api('/api/cms/config', { method: 'PATCH', body: JSON.stringify(data) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['config'] });
-      toast.success('Configuration saved');
+      toast.success('System configuration deployed');
     }
   });
   if (configLoading) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
   return (
-    <div className="space-y-8 animate-fade-in pb-20">
-      <div className="flex justify-between items-center">
+    <div className="space-y-12 animate-fade-in pb-24">
+      <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Detail Deluxe Control</h1>
-          <p className="text-muted-foreground">Manage brand, site content, and system security.</p>
+          <h1 className="text-4xl font-black tracking-tighter uppercase text-shimmer">Brand Command</h1>
+          <p className="text-muted-foreground font-medium mt-2 italic">Refining the Stone Cold aesthetic and system logic.</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setPreviewScale(prev => prev === 1 ? 0.7 : 1)}>
-            <Eye className="h-4 w-4 mr-2" /> {previewScale === 1 ? 'Compact' : 'Full'}
+        <div className="flex gap-3">
+          <Button variant="outline" className="border-2 font-bold" onClick={() => setPreviewScale(prev => prev === 1 ? 0.7 : 1)}>
+            <Eye className="h-4 w-4 mr-2" /> {previewScale === 1 ? 'Viewport Zoom' : 'Full Scale'}
           </Button>
-          <Button variant="default" className="bg-brand-600" onClick={() => toast.info("Deploying live...")}>
-            Deploy Changes
+          <Button variant="default" className="bg-metallic text-white font-bold shadow-lg" onClick={() => toast.info("Propagating global changes...")}>
+            Deploy Manifest
           </Button>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-7 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="lg:col-span-7 space-y-10">
           <Tabs defaultValue="appearance" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-8 bg-muted/50 p-1">
-              <TabsTrigger value="appearance"><Palette className="h-4 w-4 mr-1 hidden sm:block" /> Style</TabsTrigger>
-              <TabsTrigger value="hero"><Globe className="h-4 w-4 mr-1 hidden sm:block" /> Hero</TabsTrigger>
-              <TabsTrigger value="features"><Sparkles className="h-4 w-4 mr-1 hidden sm:block" /> Services</TabsTrigger>
-              <TabsTrigger value="social"><MessageSquare className="h-4 w-4 mr-1 hidden sm:block" /> Social</TabsTrigger>
-              <TabsTrigger value="security"><ShieldCheck className="h-4 w-4 mr-1 hidden sm:block" /> Security</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/30 p-1 rounded-xl">
+              <TabsTrigger value="appearance" className="font-bold uppercase text-[10px]">Style</TabsTrigger>
+              <TabsTrigger value="hero" className="font-bold uppercase text-[10px]">Content</TabsTrigger>
+              <TabsTrigger value="features" className="font-bold uppercase text-[10px]">Services</TabsTrigger>
+              <TabsTrigger value="social" className="font-bold uppercase text-[10px]">Feedback</TabsTrigger>
+              <TabsTrigger value="security" className="font-bold uppercase text-[10px]">Security</TabsTrigger>
             </TabsList>
-            <TabsContent value="appearance" className="space-y-6">
-              <Card>
+            <TabsContent value="appearance" className="space-y-8 pt-6">
+              <Card className="border-none glass-ice rounded-[2rem]">
                 <CardHeader>
-                  <CardTitle>Brand Identity</CardTitle>
-                  <CardDescription>Configure your visual presence across all portals.</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="h-5 w-5 text-primary" />
+                    Chromatic Identity
+                  </CardTitle>
+                  <CardDescription>Master palette for the Stone Cold metallic look.</CardDescription>
                 </CardHeader>
-                <CardContent className="pb-6">
-                  <Button variant="outline" className="w-full justify-start gap-2" asChild>
-                    <Link to="/admin/users"><Users className="h-4 w-4" /> Manage Administrative Access</Link>
-                  </Button>
+                <CardContent className="space-y-8">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label className="text-xs font-black uppercase tracking-widest">Arctic Primary (Icy)</Label>
+                      <div className="flex gap-3">
+                        <Input type="color" className="w-14 h-12 p-1 bg-transparent border-2 rounded-xl" value={config?.brandTheme?.primaryColor} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, primaryColor: e.target.value } })} />
+                        <Input value={config?.brandTheme?.primaryColor} readOnly className="font-mono text-sm border-2 rounded-xl" />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-xs font-black uppercase tracking-widest">Metallic Secondary (Silver)</Label>
+                      <div className="flex gap-3">
+                        <Input type="color" className="w-14 h-12 p-1 bg-transparent border-2 rounded-xl" value={config?.brandTheme?.gradientEnd} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, gradientEnd: e.target.value } })} />
+                        <Input value={config?.brandTheme?.gradientEnd} readOnly className="font-mono text-sm border-2 rounded-xl" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6 rounded-[1.5rem] bg-muted/50 border-2 border-dashed border-primary/20 text-center">
+                    <Snowflake className="h-8 w-8 text-primary/30 mx-auto mb-4 animate-crackle" />
+                    <p className="text-sm text-muted-foreground italic">Current palette generated for optimal high-contrast readability on deep black surfaces.</p>
+                  </div>
                 </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="security" className="space-y-6 pt-6">
+              <Card className="border-none glass-ice rounded-[2rem]">
+                <CardHeader>
+                  <CardTitle>System Hardening</CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+                    <div className="flex items-center gap-4">
+                      <ShieldCheck className="h-6 w-6 text-emerald-500" />
+                      <div>
+                        <p className="font-black text-sm uppercase">Global Rate Limiting</p>
+                        <p className="text-xs text-muted-foreground">Status: Active & Enforced</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-emerald-500">PROTECTED</Badge>
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-50 ml-1">Business Integrity Logs</h4>
                     <div className="space-y-2">
-                      <Label>Primary Brand Color</Label>
-                      <div className="flex gap-2">
-                        <Input type="color" className="w-12 h-10 p-1" value={config?.brandTheme?.primaryColor} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, primaryColor: e.target.value } })} />
-                        <Input value={config?.brandTheme?.primaryColor} readOnly className="font-mono text-xs" />
+                       <div className="flex items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/50 text-xs">
+                        <Activity className="h-4 w-4 text-primary" />
+                        <span className="font-bold">Handshake:</span> 
+                        <span className="text-muted-foreground">Turnstile Session Validated for IP 192.x.x.x</span>
+                        <span className="ml-auto opacity-50 font-mono">12s ago</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/50 text-xs">
+                        <Server className="h-4 w-4 text-secondary" />
+                        <span className="font-bold">Durable Object:</span> 
+                        <span className="text-muted-foreground">Index consistency check completed successfully.</span>
+                        <span className="ml-auto opacity-50 font-mono">5m ago</span>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="security" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="border-emerald-100 bg-emerald-50/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Lock className="h-4 w-4 text-emerald-600" />
-                      Global Protection
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground">SSL/HSTS</span>
-                        <Badge className="bg-emerald-500 h-5 px-1.5 text-[10px]">ACTIVE</Badge>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground">CSP Policies</span>
-                        <Badge className="bg-emerald-500 h-5 px-1.5 text-[10px]">STRICT</Badge>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground">Turnstile Session</span>
-                        <Badge className="bg-emerald-500 h-5 px-1.5 text-[10px]">ENFORCED</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="border-brand-100 bg-brand-50/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Activity className="h-4 w-4 text-brand-600" />
-                      Rate Limiting
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground">Booking Attempts</span>
-                        <span className="font-bold">5 per hour</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground">Window Size</span>
-                        <span className="font-bold">3600s</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground">DO Storage Sync</span>
-                        <Badge className="bg-brand-500 h-5 px-1.5 text-[10px]">VERIFIED</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Activity Log</CardTitle>
-                  <CardDescription>Recent business-level security events.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg text-xs">
-                    <Server className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <p className="font-bold">Durable Object State Scrub</p>
-                      <p className="text-muted-foreground opacity-70">Successfully verified 128 indices across all entity types.</p>
-                    </div>
-                    <span className="text-muted-foreground font-mono">Just Now</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg text-xs">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                    <div className="flex-1">
-                      <p className="font-bold">Turnstile Session Validated</p>
-                      <p className="text-muted-foreground opacity-70">Security handshake completed for new booking draft.</p>
-                    </div>
-                    <span className="text-muted-foreground font-mono">3m ago</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="hero" className="space-y-6">
-              <Card>
-                <CardHeader><CardTitle>Hero Configuration</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Main Headline</Label>
-                    <Input defaultValue={config?.heroTitle} onBlur={(e) => updateConfig.mutate({ heroTitle: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Subtitle Description</Label>
-                    <Input defaultValue={config?.heroSubtitle} onBlur={(e) => updateConfig.mutate({ heroSubtitle: e.target.value })} />
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
         </div>
-        <div className="lg:col-span-5 relative">
-          <div className="sticky top-24 border rounded-2xl bg-slate-200/30 overflow-hidden h-[700px] shadow-inner">
-             <div className="bg-background border-b px-4 py-2 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  <div className="h-2 w-2 rounded-full bg-red-400" />
-                  <div className="h-2 w-2 rounded-full bg-amber-400" />
-                  <div className="h-2 w-2 rounded-full bg-emerald-400" />
-                </div>
-                <div className="text-[10px] text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">
-                  detailflow.os/preview
-                </div>
+        <div className="lg:col-span-5">
+          <div className="sticky top-28 border border-border/50 rounded-[3rem] bg-card overflow-hidden h-[750px] shadow-2xl relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(30,144,255,0.05),transparent)] pointer-events-none" />
+            <div className="bg-muted/50 border-b border-border/50 px-6 py-3 flex items-center justify-between">
+              <div className="flex gap-2">
+                <div className="h-2.5 w-2.5 rounded-full bg-destructive/40" />
+                <div className="h-2.5 w-2.5 rounded-full bg-amber-400/40" />
+                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/40" />
               </div>
+              <div className="text-[9px] font-black uppercase tracking-widest opacity-50">stone-cold.os/preview</div>
             </div>
-            <div className="origin-top-left transition-transform duration-300 overflow-y-auto h-full" style={{ transform: `scale(${previewScale})` }}>
-              <div className="bg-white min-h-full p-8 shadow-2xl m-4 rounded-xl">
-                <h1 className="text-2xl font-bold" style={{ color: config?.brandTheme?.primaryColor }}>{config?.heroTitle}</h1>
-                <p className="text-muted-foreground mt-4 text-sm leading-relaxed">{config?.heroSubtitle}</p>
-                <Button className="mt-8 font-bold" style={{ backgroundColor: config?.brandTheme?.primaryColor }}>{config?.ctaText}</Button>
-                <div className="mt-12 space-y-4 border-t pt-8">
-                  <div className="h-4 w-3/4 bg-slate-100 rounded" />
-                  <div className="h-4 w-1/2 bg-slate-100 rounded" />
-                  <div className="h-4 w-2/3 bg-slate-100 rounded" />
+            <div className="origin-top-left transition-all duration-500 overflow-y-auto h-full scrollbar-hide" style={{ transform: `scale(${previewScale})` }}>
+              <div className="bg-background min-h-full p-12 m-6 rounded-[2rem] shadow-xl border border-border/20">
+                <div className="flex items-center gap-2 mb-12">
+                   <div className="h-6 w-6 bg-primary rounded" />
+                   <span className="text-sm font-black tracking-tighter uppercase">Stone Cold</span>
+                </div>
+                <h1 className="text-4xl font-black tracking-tighter leading-none text-shimmer" style={{ color: config?.brandTheme?.primaryColor }}>
+                  {config?.heroTitle}
+                </h1>
+                <p className="text-muted-foreground mt-6 text-sm font-medium leading-relaxed opacity-80">
+                  {config?.heroSubtitle}
+                </p>
+                <Button className="mt-10 h-12 px-8 font-black uppercase tracking-wider bg-metallic shadow-lg" style={{ backgroundColor: config?.brandTheme?.primaryColor }}>
+                  {config?.ctaText}
+                </Button>
+                <div className="mt-16 grid grid-cols-2 gap-4">
+                  <div className="h-24 glass-ice rounded-2xl p-4">
+                    <div className="h-2 w-12 bg-primary/20 rounded mb-2" />
+                    <div className="h-1.5 w-full bg-muted rounded" />
+                  </div>
+                  <div className="h-24 glass-ice rounded-2xl p-4">
+                    <div className="h-2 w-12 bg-primary/20 rounded mb-2" />
+                    <div className="h-1.5 w-full bg-muted rounded" />
+                  </div>
                 </div>
               </div>
             </div>
