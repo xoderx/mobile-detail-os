@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { format, addDays } from "date-fns";
 import type { Env } from './core-utils';
 import { CustomerEntity, BookingEntity, SubscriptionEntity, ServiceTierEntity, AddOnEntity, ConfigEntity, UserAccountEntity, FeedbackEntity, NewsletterEntity, initializeStore } from "./entities";
 import { ok, bad, notFound } from './core-utils';
@@ -39,7 +40,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/auth/verify-turnstile', async (c) => {
     const { token } = await c.req.json();
     if (!token) return bad(c, 'Security token missing');
-    // In a real app, verify with Cloudflare API. Here we handshake success.
     return ok(c, { verified: true });
   });
   app.post('/api/auth/register', async (c) => {
@@ -111,7 +111,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.post('/api/bookings', async (c) => {
     const {customerId, vehicleSize, packageId, addOns=[], dateTime, contact, totalPrice, turnstileToken} = await c.req.json();
-    if (!vehicleSize || !packageId || !dateTime || !contact?.firstName || !contact?.lastName || !contact?.email || !contact?.phone || !contact?.address || !turnstileToken || totalPrice <= 0) return bad(c, 'Missing or invalid required booking details (vehicle, package, date, contact, token, price)');
+    if (!vehicleSize || !packageId || !dateTime || !contact?.firstName || !contact?.lastName || !contact?.email || !contact?.phone || !contact?.address || !turnstileToken || totalPrice <= 0) return bad(c, 'Missing or invalid required booking details');
     const booking = await BookingEntity.create(c.env, {customerId, vehicleSize, packageId, addOns: addOns || [], dateTime, totalPrice, turnstileToken, contact, id: crypto.randomUUID(), status: 'pending', checklist: {} });
     return ok(c, booking);
   });
@@ -149,5 +149,3 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     temp: 70 + i
   }))));
 }
-
-import { format, addDays } from "date-fns";

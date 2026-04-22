@@ -7,6 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Badge } from '@/components/ui/badge';
 import { BRAND_COLORS } from '@/lib/constants';
 import { QuickCommandHub } from '@/components/admin/QuickCommandHub';
+import { cn } from "@/lib/utils";
 const chartData = [
   { name: 'Mon', revenue: 400 },
   { name: 'Tue', revenue: 600 },
@@ -55,8 +56,8 @@ export function Dashboard() {
       {/* Primary Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Total Yield', value: `$${totalRevenue?.toLocaleString() ?? '0'}`, icon: DollarSign, meta: 'All-time platform yield', color: 'text-primary' },
-          { label: 'Monthly MRR', value: `$${mrr?.toLocaleString() ?? '0'}`, icon: TrendingUp, meta: 'Active Arctic Plans', color: 'text-primary' },
+          { label: 'Total Yield', value: `${totalRevenue?.toLocaleString() ?? '0'}`, icon: DollarSign, meta: 'All-time platform yield', color: 'text-primary' },
+          { label: 'Monthly MRR', value: `${mrr?.toLocaleString() ?? '0'}`, icon: TrendingUp, meta: 'Active Arctic Plans', color: 'text-primary' },
           { label: 'Fleet Registry', value: customerCount ?? '0', icon: UsersIcon, meta: 'Unique Service Entities', color: 'text-secondary' },
         ].map((stat, i) => (
           <Card key={i} className="border-2 border-border/50 glass-ice rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all group overflow-hidden">
@@ -87,7 +88,7 @@ export function Dashboard() {
           </CardContent>
         </Card>
       </div>
-      {/* Quick Command Hub - NEW */}
+      {/* Quick Command Hub */}
       <QuickCommandHub />
       {/* Secondary Data Layer */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -114,10 +115,10 @@ export function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} axisLine={false} tickLine={false} />
                 <Tooltip
                   cursor={{ stroke: BRAND_COLORS.primary, strokeWidth: 2 }}
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(0,0,0,0.95)', 
-                    borderRadius: '24px', 
-                    border: '2px solid rgba(0,191,255,0.3)', 
+                  contentStyle={{
+                    backgroundColor: 'rgba(0,0,0,0.95)',
+                    borderRadius: '24px',
+                    border: '2px solid rgba(0,191,255,0.3)',
                     backdropFilter: 'blur(16px)',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
                   }}
