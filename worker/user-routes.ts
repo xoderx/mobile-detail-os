@@ -10,15 +10,19 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const bookings = await BookingEntity.list(c.env);
     const customers = await CustomerEntity.list(c.env);
     const subs = await SubscriptionEntity.list(c.env);
+    const feedback = await FeedbackEntity.list(c.env);
     const totalRevenue = bookings.items.reduce((acc, b) => acc + (b.status === 'completed' ? b.totalPrice : 0), 0);
     const mrr = subs.items.reduce((acc, s) => acc + (s.status === 'active' ? s.price : 0), 0);
+    const avgRating = feedback.items.length > 0 
+      ? feedback.items.reduce((acc, f) => acc + f.rating, 0) / feedback.items.length 
+      : 5.0;
     return ok(c, {
       totalRevenue,
       mrr,
       activeJobs: bookings.items.filter(b => b.status !== 'completed' && b.status !== 'cancelled').length,
       customerCount: customers.items.length,
       subscriptionCount: subs.items.filter(s => s.status === 'active').length,
-      satisfactionScore: 4.9,
+      satisfactionScore: parseFloat(avgRating.toFixed(1)),
       integrations: { stripe: true, twilio: false, googleMaps: true }
     });
   });
@@ -27,6 +31,12 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await initializeStore(c.env);
     const entity = new ConfigEntity(c.env, 'global-settings');
     return ok(c, await entity.getState());
+  });
+  app.patch('/api/cms/config', async (c) => {
+    const payload = await c.req.json();
+    const entity = new ConfigEntity(c.env, 'global-settings');
+    await entity.patch(payload);
+    return ok(c, { success: true });
   });
   app.get('/api/cms/services', async (c) => {
     await initializeStore(c.env);
@@ -87,6 +97,10 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, lead);
   });
   // FEEDBACK
+  app.get('/api/feedback', async (c) => {
+    await initializeStore(c.env);
+    return ok(c, await FeedbackEntity.list(c.env));
+  });
   app.post('/api/feedback', async (c) => {
     const { rating, comment, customerId } = await c.req.json();
     if (!rating) return bad(c, 'Rating required');
@@ -95,9 +109,22 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       rating,
       comment,
       customerId,
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      featured: false
     });
     return ok(c, feedback);
+  });
+  app.patch('/api/feedback/:id', async (c) => {
+    const id = c.req.param('id');
+    const payload = await c.req.json();
+    const entity = new FeedbackEntity(c.env, id);
+    await entity.patch(payload);
+    return ok(c, { success: true });
+  });
+  app.delete('/api/feedback/:id', async (c) => {
+    const id = c.req.param('id');
+    const deleted = await FeedbackEntity.delete(c.env, id);
+    return ok(c, { deleted });
   });
   // BOOKINGS
   app.get('/api/bookings', async (c) => {

@@ -28,6 +28,13 @@ export interface Testimonial {
   rating: number;
   avatarUrl?: string;
 }
+export interface GalleryItem {
+  id: string;
+  url: string;
+  title: string;
+  category: 'luxury' | 'classic' | 'exotic' | 'daily';
+  description?: string;
+}
 export interface ServiceTier {
   id: string;
   name: string;
@@ -48,10 +55,14 @@ export interface AppConfig {
   siteTitle: string;
   heroTitle: string;
   heroSubtitle: string;
+  heroImageUrl?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
   aboutText: string;
   ctaText: string;
   features: FeatureItem[];
   testimonials: Testimonial[];
+  gallery: GalleryItem[];
   brandTheme: {
     primaryColor: string;
     gradientStart: string;
@@ -62,10 +73,12 @@ export interface AppConfig {
     stripe: boolean;
     twilio: boolean;
     googleMaps: boolean;
+    cloudinary: boolean;
   };
   keys: {
     stripePublicKey: string;
     twilioSid: string;
+    cloudinaryKey?: string;
   };
 }
 export interface Chat {

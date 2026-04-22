@@ -1,6 +1,6 @@
 import { IndexedEntity } from "./core-utils";
 import type { Env } from './core-utils';
-import type { ServiceTier, AddOn, AppConfig, User, VehicleSize } from "@shared/types";
+import type { ServiceTier, AddOn, AppConfig, User, VehicleSize, GalleryItem } from "@shared/types";
 import { subDays, addDays } from "date-fns";
 export interface Customer {
   id: string;
@@ -122,11 +122,16 @@ export interface Feedback {
   comment?: string;
   customerId?: string;
   createdAt: number;
+  featured?: boolean;
 }
 export class FeedbackEntity extends IndexedEntity<Feedback> {
   static readonly entityName = "feedback";
   static readonly indexName = "feedbacks";
   static readonly initialState: Feedback = { id: "", rating: 0, createdAt: 0 };
+  static seedData: Feedback[] = [
+    { id: "f-1", rating: 5, comment: "The ceramic coating is like a glass shield. Best in the city.", createdAt: Date.now(), featured: true },
+    { id: "f-2", rating: 5, comment: "Professional, punctual, and pristine finish.", createdAt: Date.now(), featured: true },
+  ];
 }
 export class ConfigEntity extends IndexedEntity<AppConfig> {
   static readonly entityName = "config";
@@ -136,17 +141,26 @@ export class ConfigEntity extends IndexedEntity<AppConfig> {
     siteTitle: "Stone Cold Detailing",
     heroTitle: "Frozen Perfection. Metallic Shine.",
     heroSubtitle: "Premium mobile automotive detailing with an icy precision finish starting at just $50.",
+    heroImageUrl: "https://images.unsplash.com/photo-1603584173870-7f37ecf6745d?auto=format&fit=crop&q=80&w=2000",
     ctaText: "Book Your Experience",
     aboutText: "Stone Cold Detailing represents the pinnacle of mobile automotive care.",
+    logoUrl: "",
+    faviconUrl: "",
     features: [
       { id: 'f1', title: 'Glacial Polish', description: 'Flawless paint correction.', iconName: 'SprayCan' },
       { id: 'f2', title: 'Deep Freeze Interior', description: 'Steam sanitized.', iconName: 'CarFront' },
     ],
     testimonials: [
-      { id: 't1', author: 'Mark Stevens', role: 'Tesla Owner', content: 'Incredible finish.', rating: 5 }
+      { id: 't1', author: 'Mark Stevens', role: 'Tesla Owner', content: 'Incredible finish. The water just slides off.', rating: 5 }
+    ],
+    gallery: [
+      { id: 'g1', url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800', title: 'Porsche 911 Ceramic', category: 'luxury' },
+      { id: 'g2', url: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=800', title: 'Ferrari F40 Deep Clean', category: 'exotic' },
+      { id: 'g3', url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=800', title: 'Classic G-Wagon Polish', category: 'classic' },
+      { id: 'g4', url: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=800', title: 'BMW M4 Interior', category: 'luxury' }
     ],
     brandTheme: { primaryColor: "#00BFFF", gradientStart: "#00BFFF", gradientEnd: "#C0C0C0", fontScale: 1 },
-    integrations: { stripe: true, twilio: false, googleMaps: true },
+    integrations: { stripe: true, twilio: false, googleMaps: true, cloudinary: false },
     keys: { stripePublicKey: "pk_test_placeholder", twilioSid: "AC_placeholder" }
   };
 }
@@ -159,5 +173,6 @@ export const initializeStore = async (env: Env) => {
     CustomerEntity.ensureSeed(env),
     BookingEntity.ensureSeed(env),
     SubscriptionEntity.ensureSeed(env),
+    FeedbackEntity.ensureSeed(env),
   ]);
 };

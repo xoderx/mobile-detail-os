@@ -27,6 +27,7 @@ import Users from '@/pages/admin/Users'
 import JobDetails from '@/pages/tech/JobDetails'
 import MyBookings from '@/pages/customer/MyBookings'
 import { AppLayout } from '@/components/layout/AppLayout'
+import Reviews from '@/pages/admin/Reviews'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
@@ -129,6 +130,17 @@ const router = createBrowserRouter([
       <AuthGuard allowedRoles={["admin"]}>
         <AppLayout container>
           <Settings />
+        </AppLayout>
+      </AuthGuard>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin/reviews",
+    element: (
+      <AuthGuard allowedRoles={["admin"]}>
+        <AppLayout container>
+          <Reviews />
         </AppLayout>
       </AuthGuard>
     ),
