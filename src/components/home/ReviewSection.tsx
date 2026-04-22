@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 export function ReviewSection() {
@@ -76,15 +75,15 @@ export function ReviewSection() {
                </div>
                <div className="space-y-4 relative z-10">
                  <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Observations</label>
-                 <Textarea
+                 <Textarea 
                    value={comment}
                    onChange={(e) => setComment(e.target.value)}
                    placeholder="TRANSMIT YOUR EXPERIENCE..."
                    className="min-h-[120px] bg-slate-900/50 border-2 border-white/5 rounded-2xl text-xs font-black uppercase tracking-widest focus:border-primary transition-all p-6 placeholder:text-slate-700"
                  />
                </div>
-               <Button
-                 type="submit"
+               <Button 
+                 type="submit" 
                  disabled={submitFeedback.isPending || !comment.trim()}
                  className="w-full h-20 bg-primary text-white font-black uppercase tracking-[0.2em] text-sm rounded-2xl shadow-2xl shadow-primary/30 transition-all active:scale-95 border-t border-white/20"
                >
@@ -98,7 +97,7 @@ export function ReviewSection() {
           <div className="space-y-12">
              <div className="grid grid-cols-1 gap-8">
                {featured.length > 0 ? featured.map((f, i) => (
-                 <motion.div
+                 <motion.div 
                    key={f.id}
                    initial={{ opacity: 0, x: 20 }}
                    whileInView={{ opacity: 1, x: 0 }}

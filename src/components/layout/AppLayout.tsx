@@ -7,7 +7,8 @@ import {
   CreditCard,
   LogOut,
   LayoutDashboard,
-  UserCog
+  UserCog,
+  MessageSquare
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,6 +37,7 @@ function AppSidebar() {
     { label: "Client Database", icon: Users, path: "/admin/customers" },
     { label: "Team Management", icon: UserCog, path: "/admin/users" },
     { label: "Subscriptions", icon: CreditCard, path: "/admin/subs" },
+    { label: "Review Center", icon: MessageSquare, path: "/admin/reviews" },
     { label: "System Control", icon: Settings, path: "/admin/settings" },
   ];
   const handleLogout = () => {
