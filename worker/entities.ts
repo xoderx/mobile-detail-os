@@ -2,7 +2,6 @@ import { IndexedEntity } from "./core-utils";
 import type { Env } from './core-utils';
 import type { ServiceTier, AddOn, AppConfig, User, VehicleSize } from "@shared/types";
 import { subDays, addDays } from "date-fns";
-
 export interface Customer {
   id: string;
   firstName: string;
@@ -11,7 +10,6 @@ export interface Customer {
   phone: string;
   lastServiceDate?: number;
 }
-
 export interface Booking {
   id: string;
   customerId: string;
@@ -24,7 +22,6 @@ export interface Booking {
   location?: string;
   checklist?: Record<string, boolean>;
 }
-
 export interface Subscription {
   id: string;
   customerId: string;
@@ -33,7 +30,17 @@ export interface Subscription {
   nextRenewal: number;
   price: number;
 }
-
+export interface NewsletterLead {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: number;
+}
+export class NewsletterEntity extends IndexedEntity<NewsletterLead> {
+  static readonly entityName = "newsletter";
+  static readonly indexName = "newsletters";
+  static readonly initialState: NewsletterLead = { id: "", email: "", name: "", createdAt: 0 };
+}
 export class CustomerEntity extends IndexedEntity<Customer> {
   static readonly entityName = "customer";
   static readonly indexName = "customers";
@@ -44,17 +51,7 @@ export class CustomerEntity extends IndexedEntity<Customer> {
     { id: "cust-3", firstName: "Marcus", lastName: "Thorne", email: "m.thorne@techcorp.io", phone: "555-0103" },
     { id: "cust-4", firstName: "Sarah", lastName: "Jenkins", email: "sarahj@me.com", phone: "555-0104", lastServiceDate: subDays(new Date(), 2).getTime() },
   ];
-
-  static async ensureSeed(env: Env): Promise<void> {
-    const page = await CustomerEntity.list(env);
-    if (page.items.length === 0) {
-      for (const data of CustomerEntity.seedData) {
-        await CustomerEntity.create(env, data);
-      }
-    }
-  }
 }
-
 export class BookingEntity extends IndexedEntity<Booking> {
   static readonly entityName = "booking";
   static readonly indexName = "bookings";
@@ -65,10 +62,8 @@ export class BookingEntity extends IndexedEntity<Booking> {
     { id: "b-1", customerId: "cust-1", vehicleSize: "luxury", packageId: "premium", dateTime: subDays(new Date(), 5).toISOString(), status: 'completed', totalPrice: 359, technicianId: "tech-1", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
     { id: "b-2", customerId: "cust-2", vehicleSize: "suv", packageId: "full", dateTime: subDays(new Date(), 1).toISOString(), status: 'completed', totalPrice: 180, technicianId: "tech-2", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
     { id: "b-3", customerId: "cust-3", vehicleSize: "sedan", packageId: "basic", dateTime: addDays(new Date(), 1).toISOString(), status: 'confirmed', totalPrice: 50, technicianId: "tech-1", checklist: {} },
-    { id: "b-4", customerId: "cust-4", vehicleSize: "truck", packageId: "full", dateTime: addDays(new Date(), 2).toISOString(), status: 'pending', totalPrice: 220, technicianId: "unassigned", checklist: {} },
   ];
 }
-
 export class SubscriptionEntity extends IndexedEntity<Subscription> {
   static readonly entityName = "subscription";
   static readonly indexName = "subscriptions";
@@ -76,19 +71,8 @@ export class SubscriptionEntity extends IndexedEntity<Subscription> {
   static seedData: Subscription[] = [
     { id: "s-1", customerId: "cust-1", planType: "elite", status: "active", nextRenewal: addDays(new Date(), 15).getTime(), price: 199 },
     { id: "s-2", customerId: "cust-2", planType: "premium", status: "active", nextRenewal: addDays(new Date(), 22).getTime(), price: 129 },
-    { id: "s-3", customerId: "cust-4", planType: "basic", status: "active", nextRenewal: addDays(new Date(), 5).getTime(), price: 79 },
   ];
-
-  static async ensureSeed(env: Env): Promise<void> {
-    const page = await SubscriptionEntity.list(env);
-    if (page.items.length === 0) {
-      for (const data of SubscriptionEntity.seedData) {
-        await SubscriptionEntity.create(env, data);
-      }
-    }
-  }
 }
-
 export class ServiceTierEntity extends IndexedEntity<ServiceTier> {
   static readonly entityName = "service-tier";
   static readonly indexName = "service-tiers";
@@ -99,17 +83,7 @@ export class ServiceTierEntity extends IndexedEntity<ServiceTier> {
     { id: 'full', name: 'Full Detail', price: 180, features: ['Signature Wash', 'Interior Detail', 'Nano Clay Bar', 'Frozen Crystal Wax'], displayPrice: '$180 - $220', specialOffer: '$150 first-time visit', isPopular: true },
     { id: 'premium', name: 'Premium Detail', price: 280, features: ['Full Detail Plus', 'Arctic Ceramic Shield', 'Engine Glacier Clean', 'Lifetime Sealant'], displayPrice: '$280 - $350', isPopular: false },
   ];
-
-  static async ensureSeed(env: Env): Promise<void> {
-    const page = await ServiceTierEntity.list(env);
-    if (page.items.length === 0) {
-      for (const data of ServiceTierEntity.seedData) {
-        await ServiceTierEntity.create(env, data);
-      }
-    }
-  }
 }
-
 export class AddOnEntity extends IndexedEntity<AddOn> {
   static readonly entityName = "addon";
   static readonly indexName = "addons";
@@ -120,17 +94,7 @@ export class AddOnEntity extends IndexedEntity<AddOn> {
     { id: 'headlight', name: 'Headlight Restore', price: 60, description: 'Restore clarity to fogged headlights.' },
     { id: 'clay', name: 'Clay Bar Treatment', price: 50, description: 'Remove contaminants for a glass-smooth finish.' },
   ];
-
-  static async ensureSeed(env: Env): Promise<void> {
-    const page = await AddOnEntity.list(env);
-    if (page.items.length === 0) {
-      for (const data of AddOnEntity.seedData) {
-        await AddOnEntity.create(env, data);
-      }
-    }
-  }
 }
-
 export class UserAccountEntity extends IndexedEntity<User> {
   static readonly entityName = "user-account";
   static readonly indexName = "user-accounts";
@@ -140,20 +104,9 @@ export class UserAccountEntity extends IndexedEntity<User> {
   static seedData: User[] = [
     { id: "admin-1", name: "System Admin", email: "admin@stonecold.com", role: "admin", isActive: true, createdAt: Date.now() },
     { id: "tech-1", name: "James Wilson", email: "james@stonecold.com", role: "tech", isActive: true, createdAt: Date.now() },
-    { id: "tech-2", name: "Sarah Miller", email: "sarah@stonecold.com", role: "tech", isActive: true, createdAt: Date.now() },
     { id: "cust-1", name: "Demo Customer", email: "customer@gmail.com", role: "customer", isActive: true, createdAt: Date.now() },
   ];
-
-  static async ensureSeed(env: Env): Promise<void> {
-    const page = await UserAccountEntity.list(env);
-    if (page.items.length === 0) {
-      for (const data of UserAccountEntity.seedData) {
-        await UserAccountEntity.create(env, data);
-      }
-    }
-  }
 }
-
 export interface Feedback {
   id: string;
   rating: number;
@@ -161,14 +114,11 @@ export interface Feedback {
   customerId?: string;
   createdAt: number;
 }
-
 export class FeedbackEntity extends IndexedEntity<Feedback> {
   static readonly entityName = "feedback";
   static readonly indexName = "feedbacks";
   static readonly initialState: Feedback = { id: "", rating: 0, createdAt: 0 };
-  static seedData: Feedback[] = [];
 }
-
 export class ConfigEntity extends IndexedEntity<AppConfig> {
   static readonly entityName = "config";
   static readonly indexName = "configs";
@@ -178,23 +128,27 @@ export class ConfigEntity extends IndexedEntity<AppConfig> {
     heroTitle: "Frozen Perfection. Metallic Shine.",
     heroSubtitle: "Premium mobile automotive detailing with an icy precision finish starting at just $50.",
     ctaText: "Book Your Experience",
-    aboutText: "Stone Cold Detailing represents the pinnacle of mobile automotive care. Using icy precision and metallic-grade materials, we ensure your vehicle leaves with a showroom frost.",
+    aboutText: "Stone Cold Detailing represents the pinnacle of mobile automotive care.",
     features: [
-      { id: 'f1', title: 'Glacial Polish', description: 'Flawless paint correction with an arctic glow.', iconName: 'SprayCan' },
-      { id: 'f2', title: 'Deep Freeze Interior', description: 'Steam sanitized and leather restoration.', iconName: 'CarFront' },
-      { id: 'f3', title: 'Ice Shield Protection', description: 'Advanced metallic shielding against UV and grime.', iconName: 'ShieldCheck' }
+      { id: 'f1', title: 'Glacial Polish', description: 'Flawless paint correction.', iconName: 'SprayCan' },
+      { id: 'f2', title: 'Deep Freeze Interior', description: 'Steam sanitized.', iconName: 'CarFront' },
     ],
     testimonials: [
-      { id: 't1', author: 'Mark Stevens', role: 'Tesla Model S Owner', content: 'The finish is literally icy. Never seen my car look this metallic and clean.', rating: 5 }
+      { id: 't1', author: 'Mark Stevens', role: 'Tesla Owner', content: 'Incredible finish.', rating: 5 }
     ],
-    brandTheme: {
-      primaryColor: "#00BFFF",
-      gradientStart: "#00BFFF",
-      gradientEnd: "#C0C0C0",
-      fontScale: 1
-    },
+    brandTheme: { primaryColor: "#00BFFF", gradientStart: "#00BFFF", gradientEnd: "#C0C0C0", fontScale: 1 },
     integrations: { stripe: true, twilio: false, googleMaps: true },
     keys: { stripePublicKey: "pk_test_placeholder", twilioSid: "AC_placeholder" }
   };
 }
-//
+export const initializeStore = async (env: Env) => {
+  await Promise.all([
+    ConfigEntity.ensureSeed(env),
+    ServiceTierEntity.ensureSeed(env),
+    AddOnEntity.ensureSeed(env),
+    UserAccountEntity.ensureSeed(env),
+    CustomerEntity.ensureSeed(env),
+    BookingEntity.ensureSeed(env),
+    SubscriptionEntity.ensureSeed(env),
+  ]);
+};
