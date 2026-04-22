@@ -84,7 +84,8 @@ function runSetupCommands() {
     "bun add @stripe/stripe-js @stripe/react-stripe-js stripe",
     "bun add zustand",
     "bun add lucide-react framer-motion",
-    "bun add sonner"
+    "bun add sonner",
+    "bun add react-textarea-autosize"
 ];
     
     if (commands.length === 0) {
