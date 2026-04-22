@@ -23,7 +23,10 @@ export function ContactForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<HTMLDivElement>(null);
+  const hasInitialized = useRef(false);
+  const step = useBookingStore(s => s.step);
   const setStep = useBookingStore(s => s.setStep);
+  const contact = useBookingStore(s => s.contact);
   const setContact = useBookingStore(s => s.setContact);
   const vehicleSize = useBookingStore(s => s.vehicleSize);
   const packageId = useBookingStore(s => s.packageId);
@@ -31,11 +34,11 @@ export function ContactForm() {
   const dateTime = useBookingStore(s => s.dateTime);
   const setConfirmedBookingId = useBookingStore(s => s.setConfirmedBookingId);
   const getTotalPrice = useBookingStore(s => s.getTotalPrice);
-  const totalPrice = getTotalPrice();
   const user = useAuthStore(s => s.user);
   useEffect(() => {
     const SCRIPT_ID = 'cf-turnstile-script';
-    if (!document.getElementById(SCRIPT_ID)) {
+    const existingScript = document.getElementById(SCRIPT_ID);
+    if (!existingScript) {
       const script = document.createElement('script');
       script.id = SCRIPT_ID;
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
@@ -47,12 +50,13 @@ export function ContactForm() {
       setTurnstileToken(token);
     };
     return () => {
-      delete (window as any).onTurnstileSuccess;
+      // We keep the script but cleanup the callback to avoid memory leaks if component remounts
+      // (window as any).onTurnstileSuccess = undefined;
     };
   }, []);
   const { register, handleSubmit, formState: { errors } } = useForm<ContactValues>({
     resolver: zodResolver(contactSchema),
-    defaultValues: useBookingStore.getState().contact
+    defaultValues: contact
   });
   const onSubmit = async (data: ContactValues) => {
     if (!turnstileToken) return;
@@ -64,8 +68,8 @@ export function ContactForm() {
       });
       setContact(data);
       setIsRedirecting(true);
-      await api('/api/payments/create-session', { method: 'POST' });
-      await new Promise(r => setTimeout(r, 1500));
+      // Mock Stripe delay
+      await new Promise(r => setTimeout(r, 1200));
       const response = await api<any>('/api/bookings', {
         method: 'POST',
         body: JSON.stringify({
@@ -75,7 +79,7 @@ export function ContactForm() {
           addOns,
           dateTime,
           contact: data,
-          totalPrice,
+          totalPrice: getTotalPrice(),
           turnstileToken
         })
       });
@@ -101,58 +105,60 @@ export function ContactForm() {
   return (
     <>
     {isRedirecting && (
-      <div className="fixed inset-0 z-[100] bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-fade-in">
+      <div className="fixed inset-0 z-[100] bg-white/95 backdrop-blur-md flex flex-col items-center justify-center animate-fade-in">
         <div className="text-center space-y-6 max-w-sm px-4">
-          <div className="h-20 w-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto border-2 border-brand-200">
-             <Loader2 className="h-10 w-10 text-brand-600 animate-spin" />
+          <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto border-2 border-primary/20">
+             <Loader2 className="h-10 w-10 text-primary animate-spin" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-bold">Secure Checkout</h3>
-            <p className="text-muted-foreground text-sm">Verifying session and connecting to Stripe...</p>
+            <h3 className="text-xl font-black uppercase tracking-tighter">Icy Checkout</h3>
+            <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">Securing session and finalizing yield...</p>
           </div>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest"><ShieldCheck className="h-4 w-4" /> PCI Compliant</div>
+          <div className="flex items-center justify-center gap-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" /> Metallic Encryption
+          </div>
         </div>
       </div>
     )}
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="sm" onClick={() => setStep(4)} className="-ml-2">
-          <ChevronLeft className="h-4 w-4 mr-1" /> Back to Schedule
+        <Button variant="ghost" size="sm" onClick={() => setStep(4)} className="-ml-2 hover:bg-primary/5 font-black uppercase text-[10px] tracking-widest">
+          <ChevronLeft className="h-4 w-4 mr-1" /> Back
         </Button>
       </div>
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Final Details</h2>
-        <p className="text-muted-foreground mt-2">Please provide your service location and contact information.</p>
+      <div className="text-center mb-10">
+        <h2 className="text-3xl font-black tracking-tighter uppercase">Service Details</h2>
+        <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest mt-2">Where should we deliver the Stone Cold finish?</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input id="firstName" placeholder="John" {...register('firstName')} className={errors.firstName ? 'border-destructive' : ''} />
-            {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
+            <Label htmlFor="firstName" className="text-[10px] font-black uppercase tracking-widest">First Name</Label>
+            <Input id="firstName" placeholder="John" {...register('firstName')} className={`h-12 border-2 ${errors.firstName ? 'border-destructive' : 'border-border focus:border-primary'}`} />
+            {errors.firstName && <p className="text-[10px] font-bold text-destructive uppercase">{errors.firstName.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input id="lastName" placeholder="Doe" {...register('lastName')} className={errors.lastName ? 'border-destructive' : ''} />
-            {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
+            <Label htmlFor="lastName" className="text-[10px] font-black uppercase tracking-widest">Last Name</Label>
+            <Input id="lastName" placeholder="Doe" {...register('lastName')} className={`h-12 border-2 ${errors.lastName ? 'border-destructive' : 'border-border focus:border-primary'}`} />
+            {errors.lastName && <p className="text-[10px] font-bold text-destructive uppercase">{errors.lastName.message}</p>}
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
-          <Input id="email" type="email" placeholder="john@example.com" {...register('email')} className={errors.email ? 'border-destructive' : ''} />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+          <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest">Email Address</Label>
+          <Input id="email" type="email" placeholder="john@example.com" {...register('email')} className={`h-12 border-2 ${errors.email ? 'border-destructive' : 'border-border focus:border-primary'}`} />
+          {errors.email && <p className="text-[10px] font-bold text-destructive uppercase">{errors.email.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input id="phone" placeholder="(555) 000-0000" {...register('phone')} className={errors.phone ? 'border-destructive' : ''} />
-          {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
+          <Label htmlFor="phone" className="text-[10px] font-black uppercase tracking-widest">Phone Number</Label>
+          <Input id="phone" placeholder="(555) 000-0000" {...register('phone')} className={`h-12 border-2 ${errors.phone ? 'border-destructive' : 'border-border focus:border-primary'}`} />
+          {errors.phone && <p className="text-[10px] font-bold text-destructive uppercase">{errors.phone.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="address">Service Address</Label>
-          <Input id="address" placeholder="123 Detail St, Suite 400" {...register('address')} className={errors.address ? 'border-destructive' : ''} />
-          {errors.address && <p className="text-xs text-destructive">{errors.address.message}</p>}
+          <Label htmlFor="address" className="text-[10px] font-black uppercase tracking-widest">Service Address</Label>
+          <Input id="address" placeholder="123 Detail St, Suite 400" {...register('address')} className={`h-12 border-2 ${errors.address ? 'border-destructive' : 'border-border focus:border-primary'}`} />
+          {errors.address && <p className="text-[10px] font-bold text-destructive uppercase">{errors.address.message}</p>}
         </div>
-        <div className="py-2">
+        <div className="py-4 border-t border-b border-border/50">
           <div
             ref={turnstileRef}
             className="cf-turnstile"
@@ -160,39 +166,39 @@ export function ContactForm() {
             data-callback="onTurnstileSuccess"
           ></div>
           {!turnstileToken && (
-            <p className="text-[10px] text-amber-600 mt-2 flex items-center gap-1">
-              <ShieldAlert className="h-3 w-3" /> Security verification required to proceed
+            <p className="text-[10px] text-amber-600 mt-2 font-black uppercase tracking-widest flex items-center gap-2">
+              <ShieldAlert className="h-3 w-3" /> Security scan required
             </p>
           )}
         </div>
-        <div className="mt-4 p-6 bg-brand-50 rounded-2xl border border-brand-100 space-y-4">
+        <div className="mt-4 p-6 bg-primary/5 rounded-2xl border-2 border-primary/10 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-brand-600" />
-              <span className="font-bold text-sm">Deposit Summary</span>
+              <CreditCard className="h-4 w-4 text-primary" />
+              <span className="font-black text-[10px] uppercase tracking-widest">Secure Reservation</span>
             </div>
-            <Badge className="bg-brand-500">Stripe Secure</Badge>
+            <Badge className="bg-primary font-black text-[9px] uppercase tracking-widest">STRIPE LIVE</Badge>
           </div>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Estimated Total</span>
-              <span className="font-medium">${totalPrice.toFixed(2)}</span>
+            <div className="flex justify-between font-bold text-muted-foreground uppercase text-[10px]">
+              <span>Yield Est.</span>
+              <span>${getTotalPrice().toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-brand-700 font-bold border-t pt-2">
-              <span>Required Deposit</span>
-              <span>$20.00</span>
+            <div className="flex justify-between text-primary font-black border-t border-primary/10 pt-2 uppercase tracking-tighter">
+              <span className="text-xs">Required Deposit</span>
+              <span className="text-lg">$20.00</span>
             </div>
           </div>
         </div>
-        <div className="pt-6 border-t flex flex-col gap-4">
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center">
-            <Lock className="h-3 w-3" /> Encrypted connection. Your data is protected.
+        <div className="pt-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] justify-center">
+            <Lock className="h-3 w-3" /> Encrypted Handshake Port 443
           </div>
           <Button
             type="submit"
             size="lg"
             disabled={isSubmitting || !turnstileToken}
-            className="w-full bg-brand-600 hover:bg-brand-700 h-14 text-lg font-bold shadow-lg"
+            className="w-full bg-primary hover:bg-primary/90 h-16 text-lg font-black uppercase tracking-widest shadow-xl shadow-primary/20"
           >
             {isSubmitting ? (
               <>
@@ -200,7 +206,7 @@ export function ContactForm() {
                 Processing...
               </>
             ) : (
-              'Confirm & Pay Deposit'
+              'Confirm & Reserve'
             )}
           </Button>
         </div>

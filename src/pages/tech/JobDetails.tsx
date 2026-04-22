@@ -12,7 +12,7 @@ import {
   Clock, Car, Package, AlertCircle, Loader2, LogOut
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
+import { LOGO_BASE64, BRAND_SHORT_NAME } from '@/lib/constants';
 const DEFAULT_CHECKLIST = {
   'Exterior Wash': false,
   'Wheel Cleaning': false,
@@ -63,13 +63,13 @@ export default function JobDetails() {
   };
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="animate-spin h-8 w-8 text-brand-600" />
+      <Loader2 className="animate-spin h-8 w-8 text-primary" />
     </div>
   );
   if (!booking) return (
     <div className="p-12 text-center space-y-4">
-      <p className="font-bold">Job assignment not found.</p>
-      <Button onClick={() => navigate('/tech')}>Back to Queue</Button>
+      <p className="font-black uppercase text-sm tracking-widest">Job not found.</p>
+      <Button onClick={() => navigate('/tech')} className="bg-primary">Return to Queue</Button>
     </div>
   );
   const toggleCheck = (item: string) => {
@@ -80,11 +80,14 @@ export default function JobDetails() {
   const allChecked = Object.values(localChecklist).every(v => v);
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <header className="sticky top-0 z-50 bg-background border-b h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm">
         <Button variant="ghost" size="sm" onClick={() => navigate('/tech')} className="-ml-2">
           <ChevronLeft className="h-5 w-5 mr-1" />
         </Button>
-        <span className="font-bold text-sm">Job Detail</span>
+        <div className="flex items-center gap-2">
+           <img src={LOGO_BASE64} alt="Brand" className="h-6 w-6" />
+           <span className="font-black text-xs uppercase tracking-widest">{BRAND_SHORT_NAME}</span>
+        </div>
         <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground">
           <LogOut className="h-5 w-5" />
         </Button>
@@ -92,40 +95,42 @@ export default function JobDetails() {
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="text-2xl font-black uppercase tracking-tight">
               {booking.contact?.firstName} {booking.contact?.lastName}
             </h1>
-            <p className="text-sm text-muted-foreground font-medium">{format(new Date(booking.dateTime), 'h:mm a, MMM dd')}</p>
+            <p className="text-xs text-muted-foreground font-black uppercase tracking-widest">
+              {format(new Date(booking.dateTime), 'h:mm a, MMM dd')}
+            </p>
           </div>
-          <Badge variant={booking.status === 'completed' ? 'secondary' : 'default'} className="uppercase">
+          <Badge variant={booking.status === 'completed' ? 'secondary' : 'default'} className="uppercase font-black text-[10px] tracking-widest px-3">
             {booking.status}
           </Badge>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Card className="bg-white/50 border-none shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
-              <Car className="h-5 w-5 text-brand-500" />
+              <Car className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Vehicle</p>
-                <p className="text-sm font-bold capitalize">{booking.vehicleSize}</p>
+                <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest">Vehicle</p>
+                <p className="text-xs font-bold capitalize">{booking.vehicleSize}</p>
               </div>
             </CardContent>
           </Card>
           <Card className="bg-white/50 border-none shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
-              <Package className="h-5 w-5 text-brand-500" />
+              <Package className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Service</p>
-                <p className="text-sm font-bold capitalize">{booking.packageId}</p>
+                <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest">Service</p>
+                <p className="text-xs font-bold capitalize">{booking.packageId}</p>
               </div>
             </CardContent>
           </Card>
         </div>
-        <Card className="border-none shadow-sm overflow-hidden">
+        <Card className="border-none shadow-sm overflow-hidden rounded-2xl">
           <CardHeader className="bg-white/80 border-b py-4">
-            <CardTitle className="text-sm flex items-center justify-between">
+            <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-brand-600" />
+                <CheckCircle2 className="h-4 w-4 text-primary" />
                 Service Checklist
               </div>
               {updateChecklist.isPending && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
@@ -139,8 +144,8 @@ export default function JobDetails() {
                   className={`flex items-center space-x-3 p-4 transition-colors cursor-pointer ${localChecklist[item] ? 'bg-slate-50/50' : 'bg-white'}`}
                   onClick={() => toggleCheck(item)}
                 >
-                  <Checkbox checked={localChecklist[item]} onCheckedChange={() => toggleCheck(item)} id={item} className="h-5 w-5 border-2" />
-                  <label htmlFor={item} className={`flex-1 text-sm font-bold cursor-pointer ${localChecklist[item] ? 'line-through text-muted-foreground' : 'text-slate-700'}`}>
+                  <Checkbox checked={localChecklist[item]} onCheckedChange={() => toggleCheck(item)} id={item} className="h-5 w-5 border-2 border-primary/30" />
+                  <label htmlFor={item} className={`flex-1 text-sm font-bold cursor-pointer ${localChecklist[item] ? 'line-through text-muted-foreground opacity-50' : 'text-slate-700'}`}>
                     {item}
                   </label>
                 </div>
@@ -149,38 +154,36 @@ export default function JobDetails() {
           </CardContent>
         </Card>
         <div className="grid grid-cols-2 gap-4">
-          <Button size="lg" variant="outline" className="h-14 gap-2 font-bold bg-white" asChild>
-            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booking.location || 'Client Location')}`} target="_blank" rel="noreferrer">
-              <Navigation className="h-5 w-5 text-brand-600" /> Navigate
+          <Button size="lg" variant="outline" className="h-14 gap-2 font-black uppercase text-[10px] tracking-widest bg-white border-2" asChild>
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Client Site')}`} target="_blank" rel="noreferrer">
+              <Navigation className="h-4 w-4 text-primary" /> Navigate
             </a>
           </Button>
-          <Button size="lg" variant="outline" className="h-14 gap-2 font-bold bg-white" asChild>
+          <Button size="lg" variant="outline" className="h-14 gap-2 font-black uppercase text-[10px] tracking-widest bg-white border-2" asChild>
             <a href={`tel:${booking.contact?.phone || '5550000'}`}>
-              <Phone className="h-5 w-5 text-emerald-600" /> Call Client
+              <Phone className="h-4 w-4 text-emerald-600" /> Call Client
             </a>
           </Button>
         </div>
-        <Card className="bg-brand-600 text-white border-none shadow-lg">
-          <CardContent className="p-6 space-y-4">
-            {booking.status === 'pending' && (
-              <Button className="w-full bg-white text-brand-600 hover:bg-slate-100 h-14 text-lg font-bold" onClick={() => updateStatus.mutate('confirmed')}>
-                Mark Arrived
-              </Button>
-            )}
-            {booking.status === 'confirmed' && (
-              <Button className="w-full bg-white text-brand-600 hover:bg-slate-100 h-14 text-lg font-bold" disabled={!allChecked || updateStatus.isPending} onClick={() => updateStatus.mutate('completed')}>
-                {updateStatus.isPending ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
-                {allChecked ? 'Finish & Sign-off' : 'Complete Checklist First'}
-              </Button>
-            )}
-            <div className="flex gap-2 items-start bg-brand-500/30 p-4 rounded-xl border border-white/10">
-              <AlertCircle className="h-5 w-5 shrink-0" />
-              <p className="text-xs text-brand-50 leading-relaxed font-medium">
-                Note: Client requested a high-shine finish on wheels. Double check tire dressing application.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="pt-4">
+          {booking.status === 'pending' && (
+            <Button className="w-full bg-primary hover:bg-primary/90 h-16 text-lg font-black uppercase tracking-widest shadow-xl shadow-primary/20" onClick={() => updateStatus.mutate('confirmed')}>
+              Mark Arrived
+            </Button>
+          )}
+          {booking.status === 'confirmed' && (
+            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 h-16 text-lg font-black uppercase tracking-widest shadow-xl shadow-emerald-500/20" disabled={!allChecked || updateStatus.isPending} onClick={() => updateStatus.mutate('completed')}>
+              {updateStatus.isPending ? <Loader2 className="animate-spin h-6 w-6 mr-2" /> : null}
+              {allChecked ? 'Finish & Sign-off' : 'Complete Checklist First'}
+            </Button>
+          )}
+          <div className="mt-6 flex gap-2 items-start bg-amber-500/10 p-4 rounded-xl border border-amber-500/20">
+            <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" />
+            <p className="text-[11px] text-amber-800 leading-relaxed font-bold uppercase tracking-tight">
+              Safety Note: Ensure vehicle is in shade before applying frozen ceramic coating. Verify paint temperature.
+            </p>
+          </div>
+        </div>
       </main>
     </div>
   );
