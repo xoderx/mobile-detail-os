@@ -12,10 +12,20 @@ import {
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LOGO_BASE64, BRAND_NAME, BRAND_SLOGAN } from '@/lib/constants';
 import { Logo } from '@/components/Logo';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Send, Quote } from 'lucide-react';
+import { api } from '@/lib/api-client';
+import { toast } from 'sonner';
 const IconMap: Record<string, any> = {
   SprayCan, CarFront, ShieldCheck, Award, MapPin, Sparkles, Heart, Star, Droplets
 };
 export function HomePage() {
+  const [rating, setRating] = React.useState(0);
+  const [comment, setComment] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
+  const [successMsg, setSuccessMsg] = React.useState('');
+
   const isAuthenticated = useAuthStore(s => s.isAuthenticated);
   const userRole = useAuthStore(s => s.user?.role);
   useEffect(() => {
@@ -110,6 +120,102 @@ export function HomePage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      <section id="reviews" className="py-32 bg-muted/20 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-24">
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-6">Client Feedback</h2>
+            <div className="h-2 w-32 bg-primary mx-auto rounded-full" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <div className="space-y-8">
+              <h3 className="text-3xl font-black uppercase tracking-tight mb-8">What Clients Say</h3>
+              <div className="space-y-6">
+                {[
+                  {name: 'Mark S.', text: 'Icy metallic finish that lasts weeks in any weather.', rating: 5},
+                  {name: 'Elena R.', text: 'Interior transformation was unreal. Like new again.', rating: 5},
+                  {name: 'David T.', text: 'Premium ceramic shield - worth every penny.', rating: 5}
+                ].map((t, i) => (
+                  <Card key={i} className="glass-ice p-8 rounded-[2rem] border-primary/20 hover:shadow-2xl transition-all">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex gap-1">
+                        {Array.from({length: t.rating}, (_,k) => <Star key={k} className="h-6 w-6 fill-primary text-primary" />)}
+                      </div>
+                      <Quote className="h-5 w-5 text-muted-foreground ml-auto shrink-0" />
+                    </div>
+                    <p className="text-lg italic text-muted-foreground leading-relaxed">{t.text}</p>
+                    <p className="mt-4 text-sm font-black uppercase tracking-widest text-right text-muted-foreground/70">— {t.name}</p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Card className="glass-ice p-12 rounded-[3rem] shadow-2xl border-2 border-primary/20">
+                <div className="text-center mb-10">
+                  <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Share Your Experience</h3>
+                  <p className="text-muted-foreground text-sm uppercase tracking-wider">Help future clients choose Stone Cold perfection.</p>
+                </div>
+                <div className="flex items-center justify-center mb-8 gap-2 flex-wrap">
+                  {[1,2,3,4,5].map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setRating(n)}
+                      className={`p-3 rounded-2xl font-black text-lg transition-all shadow-md ${
+                        rating === n
+                          ? 'bg-primary text-white shadow-primary/50 scale-110'
+                          : 'bg-muted hover:bg-primary/10 hover:scale-105 border-2 border-border hover:border-primary'
+                      }`}
+                      disabled={submitting}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <Textarea
+                  placeholder="What was your experience with our arctic detailing service?"
+                  rows={4}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="resize-none min-h-[120px] mb-6 border-2 rounded-2xl font-semibold text-base p-5 focus:border-primary focus:ring-primary"
+                  disabled={submitting}
+                />
+                <Button
+                  onClick={async () => {
+                    if (!rating || !comment.trim() || submitting) return;
+                    setSubmitting(true);
+                    setSuccessMsg('');
+                    try {
+                      const res = await api('/api/feedback', {
+                        method: 'POST',
+                        body: JSON.stringify({ rating, comment, customerId: null })
+                      });
+                      toast.success('Feedback submitted successfully! Thank you!');
+                      setRating(0);
+                      setComment('');
+                      setSuccessMsg('Thank you for your feedback!');
+                    } catch (err) {
+                      toast.error('Failed to submit. Please try again.');
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                  disabled={!rating || !comment.trim() || submitting}
+                  className="w-full h-16 bg-metallic text-primary-foreground font-black uppercase tracking-widest text-lg rounded-2xl shadow-2xl border border-primary/30 hover:scale-[1.02] disabled:opacity-50 transition-all"
+                >
+                  <Send className="h-6 w-6 mr-3" />
+                  Submit Review
+                </Button>
+                {successMsg && (
+                  <p className="mt-6 text-center text-emerald-600 font-black uppercase tracking-wider text-sm animate-fade-in">
+                    {successMsg}
+                  </p>
+                )}
+              </Card>
+            </div>
           </div>
         </div>
       </section>
