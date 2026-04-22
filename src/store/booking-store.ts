@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ServiceTier, AddOn, VehicleSize } from '@shared/types';
 export interface BookingState {
   step: number;
@@ -40,63 +41,80 @@ const VEHICLE_PREMIUMS: Record<string, number> = {
   truck: 40,
   luxury: 60
 };
-export const useBookingStore = create<BookingState>((set, get) => ({
-  step: 1,
-  vehicleSize: null,
-  packageId: null,
-  addOns: [],
-  dateTime: null,
-  confirmedBookingId: null,
-  availableTiers: [],
-  availableAddOns: [],
-  contact: initialContact,
-  setStep: (step) => set({ step }),
-  setVehicleSize: (vehicleSize) => set({ vehicleSize, step: 2 }),
-  setPackageId: (packageId) => set({ packageId, step: 3 }),
-  toggleAddOn: (id) => set((state) => ({
-    addOns: state.addOns.includes(id)
-      ? state.addOns.filter((a) => a !== id)
-      : [...state.addOns, id],
-  })),
-  setDateTime: (dateTime) => set({ dateTime, step: 5 }),
-  setConfirmedBookingId: (confirmedBookingId) => set({ confirmedBookingId }),
-  setContact: (contact) => set((state) => ({
-    contact: { ...state.contact, ...contact }
-  })),
-  setCatalog: (availableTiers, availableAddOns) => set({ availableTiers, availableAddOns }),
-  getTotalPrice: () => {
-    const vehicleSize = get().vehicleSize;
-    const packageId = get().packageId;
-    const addOns = get().addOns;
-    const availableTiers = get().availableTiers;
-    const availableAddOns = get().availableAddOns;
-    let total = 0;
-    if (packageId && availableTiers.length > 0) {
-      const selectedTier = availableTiers.find(t => t.id === packageId);
-      if (selectedTier) {
-        total += selectedTier.price;
-      }
-    }
-    if (vehicleSize && vehicleSize in VEHICLE_PREMIUMS) {
-      total += VEHICLE_PREMIUMS[vehicleSize as string];
-    }
-    if (addOns.length > 0 && availableAddOns.length > 0) {
-      addOns.forEach(id => {
-        const addon = availableAddOns.find(a => a.id === id);
-        if (addon) {
-          total += addon.price;
+export const useBookingStore = create<BookingState>()(
+  persist(
+    (set, get) => ({
+      step: 1,
+      vehicleSize: null,
+      packageId: null,
+      addOns: [],
+      dateTime: null,
+      confirmedBookingId: null,
+      availableTiers: [],
+      availableAddOns: [],
+      contact: initialContact,
+      setStep: (step) => set({ step }),
+      setVehicleSize: (vehicleSize) => set({ vehicleSize, step: 2 }),
+      setPackageId: (packageId) => set({ packageId, step: 3 }),
+      toggleAddOn: (id) => set((state) => ({
+        addOns: state.addOns.includes(id)
+          ? state.addOns.filter((a) => a !== id)
+          : [...state.addOns, id],
+      })),
+      setDateTime: (dateTime) => set({ dateTime, step: 5 }),
+      setConfirmedBookingId: (confirmedBookingId) => set({ confirmedBookingId }),
+      setContact: (contact) => set((state) => ({
+        contact: { ...state.contact, ...contact }
+      })),
+      setCatalog: (availableTiers, availableAddOns) => set({ availableTiers, availableAddOns }),
+      getTotalPrice: () => {
+        const vehicleSize = get().vehicleSize;
+        const packageId = get().packageId;
+        const addOns = get().addOns;
+        const availableTiers = get().availableTiers;
+        const availableAddOns = get().availableAddOns;
+        let total = 0;
+        if (packageId && availableTiers.length > 0) {
+          const selectedTier = availableTiers.find(t => t.id === packageId);
+          if (selectedTier) {
+            total += selectedTier.price;
+          }
         }
-      });
+        if (vehicleSize && vehicleSize in VEHICLE_PREMIUMS) {
+          total += VEHICLE_PREMIUMS[vehicleSize as string];
+        }
+        if (addOns.length > 0 && availableAddOns.length > 0) {
+          addOns.forEach(id => {
+            const addon = availableAddOns.find(a => a.id === id);
+            if (addon) {
+              total += addon.price;
+            }
+          });
+        }
+        return total;
+      },
+      reset: () => set({
+        step: 1,
+        vehicleSize: null,
+        packageId: null,
+        addOns: [],
+        dateTime: null,
+        confirmedBookingId: null,
+        contact: initialContact,
+      }),
+    }),
+    {
+      name: 'booking-progress-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        step: state.step,
+        vehicleSize: state.vehicleSize,
+        packageId: state.packageId,
+        addOns: state.addOns,
+        dateTime: state.dateTime,
+        contact: state.contact,
+        confirmedBookingId: state.confirmedBookingId,
+      }),
     }
-    return total;
-  },
-  reset: () => set({
-    step: 1,
-    vehicleSize: null,
-    packageId: null,
-    addOns: [],
-    dateTime: null,
-    confirmedBookingId: null,
-    contact: initialContact,
-  }),
-}));
+  )
+);

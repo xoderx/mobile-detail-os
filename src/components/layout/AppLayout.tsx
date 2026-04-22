@@ -23,7 +23,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { Badge } from "@/components/ui/badge";
-const LOGO_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY7NDkBAFIWnL6UoWfFndm7szm9jY2f9XIsomfU6Oje85fSce78AIEZTo8HWBGfFzPImRkdXV6pG9AByDAm50rUe1yV8FshWAsmYq9v1U2A2mD8tYFpZ/6y/668pXUv6LNAshZJx67vAaiB/XMC0sv6OvxPshSREvGReSjr6vAtshLREvGRedLzI95AdEJYIH5kvOT/kfMhOxEvGRS5X6M6M+AaxH8IKscAUEC30L6I/hBXigYknWuhfRH8IK8QDE0+00L+I/hBWiwZ6p+u8AOKF/UX0h7BOPLD3RAv9S+9A+vK76H5X96B7L3XvX+X65f6N7o8Y+P4IAAAAOGVYSWZNTQAqAAAACAAHAQYAAwAAAAEAAQAAAREABAAAAAEAAABAAREQAEAAAAAEAAAAUAAAAABBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykAAAADAAAABwAAAAEAAA== ";
+import { LOGO_BASE64, BRAND_SHORT_NAME } from "@/lib/constants";
 function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,29 +42,29 @@ function AppSidebar() {
     navigate('/');
   };
   return (
-    <Sidebar className="border-r border-sidebar-border/50 bg-sidebar/50 backdrop-blur-md">
-      <SidebarHeader className="p-6">
+    <Sidebar className="border-r-2 border-sidebar-border/50 bg-sidebar/50 backdrop-blur-md">
+      <SidebarHeader className="p-8">
         <div className="flex items-center gap-3">
-          <img src={LOGO_BASE64} alt="Stone Cold" className="h-8 w-8 animate-shimmer" />
-          <span className="text-lg font-black tracking-tighter uppercase text-shimmer">Stone Cold</span>
+          <img src={LOGO_BASE64} alt={BRAND_SHORT_NAME} className="h-8 w-8 animate-shimmer" />
+          <span className="text-xl font-black tracking-tighter uppercase text-shimmer">{BRAND_SHORT_NAME}</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu className="px-2">
+          <SidebarMenu className="px-4">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
-                <SidebarMenuItem key={item.path} className="mb-1">
-                  <SidebarMenuButton asChild isActive={isActive}>
+                <SidebarMenuItem key={item.path} className="mb-2">
+                  <SidebarMenuButton asChild isActive={isActive} className="h-12 px-4 rounded-xl">
                     <Link to={item.path} className={cn(
-                      "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300",
-                      isActive 
-                        ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_10px_rgba(30,144,255,0.1)]" 
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      "flex items-center gap-4 transition-all duration-300",
+                      isActive
+                        ? "bg-primary/10 text-primary border-2 border-primary/20 shadow-[0_0_15px_rgba(30,144,255,0.15)]"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-2 border-transparent"
                     )}>
-                      <item.icon className={cn("h-4 w-4", isActive && "animate-crackle")} />
-                      <span className="font-bold text-sm">{item.label}</span>
+                      <item.icon className={cn("h-5 w-5", isActive && "animate-crackle")} />
+                      <span className="font-black text-xs uppercase tracking-widest">{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -73,20 +73,23 @@ function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-6 border-t border-border/50">
-        <div className="mb-6 p-4 rounded-2xl glass-ice border-border/50">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white font-black text-[10px]">
+      <SidebarFooter className="p-8 border-t-2 border-border/50">
+        <div className="mb-8 p-5 rounded-3xl glass-ice border-2 border-primary/10 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center gap-3 mb-3 relative z-10">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xs shadow-lg shadow-primary/20 border border-white/20">
               {user?.name?.[0] || 'A'}
             </div>
-            <span className="text-sm font-bold truncate">{user?.name || 'Admin'}</span>
+            <div className="flex flex-col">
+              <span className="text-xs font-black uppercase tracking-tight truncate max-w-[120px]">{user?.name || 'Admin'}</span>
+              <Badge className="text-[8px] h-4 px-2 uppercase bg-secondary text-secondary-foreground font-black border-none w-fit mt-1">
+                {user?.role || 'User'}
+              </Badge>
+            </div>
           </div>
-          <Badge className="text-[9px] h-4 px-2 uppercase bg-secondary text-secondary-foreground font-black border-none">
-            {user?.role || 'User'}
-          </Badge>
         </div>
-        <SidebarMenuButton onClick={handleLogout} className="w-full text-muted-foreground hover:text-destructive transition-colors font-bold">
-          <LogOut className="h-4 w-4 mr-2" />
+        <SidebarMenuButton onClick={handleLogout} className="w-full h-12 text-muted-foreground hover:text-destructive transition-colors font-black uppercase text-[10px] tracking-widest border-2 border-transparent hover:border-destructive/20 rounded-xl">
+          <LogOut className="h-4 w-4 mr-3" />
           <span>Eject Session</span>
         </SidebarMenuButton>
       </SidebarFooter>
@@ -102,18 +105,18 @@ export function AppLayout({ children, container = false }: AppLayoutProps): JSX.
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />
       <SidebarInset className="bg-background">
-        <header className="flex h-16 items-center border-b border-border/50 px-6 bg-background/50 backdrop-blur-md sticky top-0 z-40">
+        <header className="flex h-16 items-center border-b-2 border-border/50 px-8 bg-background/80 backdrop-blur-md sticky top-0 z-40">
           <SidebarTrigger />
-          <div className="ml-6 h-6 w-px bg-border/50" />
-          <div className="ml-6 flex items-center gap-2">
-            <span className="text-xs font-black uppercase tracking-widest text-primary/60">System Operations</span>
-            <span className="text-xs text-muted-foreground">/</span>
-            <span className="text-xs font-bold text-muted-foreground">Admin Command</span>
+          <div className="ml-8 h-6 w-px bg-border/50" />
+          <div className="ml-8 flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">System Command</span>
+            <span className="text-xs text-muted-foreground opacity-30">/</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Operational Node</span>
           </div>
         </header>
         <main className={cn(
           "w-full",
-          container && "max-w-7xl mx-auto px-6 py-12"
+          container && "max-w-7xl mx-auto px-8 py-12"
         )}>
           {children}
         </main>
