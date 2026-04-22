@@ -32,6 +32,8 @@ export interface ServiceTier {
   id: string;
   name: string;
   price: number;
+  displayPrice?: string;
+  specialOffer?: string;
   features: string[];
   isPopular: boolean;
 }

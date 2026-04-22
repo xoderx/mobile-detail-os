@@ -3,19 +3,19 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 212 33% 97%;
     --foreground: 222 47% 11%;
-    --primary: 210 100% 56%;
+    --primary: 207 44% 49%; /* Steel Blue #4682B4 */
     --primary-foreground: 210 20% 98%;
     --muted: 210 20% 92%;
     --muted-foreground: 215 16% 47%;
     --border: 214 32% 91%;
-    --ring: 210 100% 56%;
+    --ring: 197 71% 73%; /* Sky Blue #87CEEB */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --secondary: 0 0% 75%;
+    --secondary: 197 71% 73%; /* Sky Blue #87CEEB */
     --secondary-foreground: 222 47% 11%;
     --accent: 210 100% 96%;
     --accent-foreground: 210 100% 40%;
@@ -25,33 +25,33 @@
     --radius: 0.75rem;
     --sidebar-background: 210 20% 99%;
     --sidebar-foreground: 222 47% 20%;
-    --sidebar-primary: 210 100% 56%;
+    --sidebar-primary: 207 44% 49%;
     --sidebar-border: 214 32% 91%;
   }
   .dark {
-    --background: 0 0% 4%;
+    --background: 0 0% 0%; /* Pitch Black */
     --foreground: 0 0% 100%;
-    --primary: 210 100% 56%;
+    --primary: 195 100% 50%; /* Deep Sky Blue #00BFFF */
     --primary-foreground: 0 0% 100%;
-    --muted: 210 10% 12%;
-    --muted-foreground: 210 10% 65%;
-    --border: 210 10% 15%;
-    --ring: 210 100% 56%;
-    --card: 0 0% 5%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+    --border: 0 0% 15%;
+    --ring: 195 100% 50%;
+    --card: 0 0% 10%; /* Dark Card #1A1A1A */
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 5%;
+    --popover: 0 0% 10%;
     --popover-foreground: 0 0% 100%;
-    --secondary: 0 0% 75%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 75%; /* Silver #C0C0C0 */
+    --secondary-foreground: 0 0% 0%;
     --accent: 210 100% 15%;
     --accent-foreground: 210 100% 80%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
-    --input: 210 10% 15%;
-    --sidebar-background: 0 0% 3%;
-    --sidebar-foreground: 210 10% 90%;
-    --sidebar-primary: 210 100% 56%;
-    --sidebar-border: 210 10% 10%;
+    --input: 0 0% 15%;
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 195 100% 50%;
+    --sidebar-border: 0 0% 12%;
   }
   * {
     @apply border-border;
@@ -63,16 +63,16 @@
 }
 @layer components {
   .bg-metallic {
-    background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 40%, #C0C0C0 70%, #FFFFFF 100%);
+    background: linear-gradient(135deg, #00BFFF 0%, #1E90FF 40%, #C0C0C0 70%, #FFFFFF 100%);
     background-size: 200% 200%;
   }
   .glass-ice {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_0_15px_rgba(30,144,255,0.1)];
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_20px_rgba(0,191,255,0.15)];
   }
   .text-shimmer {
-    @apply bg-clip-text text-transparent bg-[linear-gradient(110deg,#1E90FF,45%,#fff,55%,#1E90FF)] bg-[length:200%_100%] animate-shimmer;
+    @apply bg-clip-text text-transparent bg-[linear-gradient(110deg,#00BFFF,45%,#fff,55%,#00BFFF)] bg-[length:200%_100%] animate-shimmer;
   }
   .ice-crack-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e90ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6zM36 4V0h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300bfff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6zM36 4V0h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 }

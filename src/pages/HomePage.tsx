@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import {
   ChevronRight, Star, SprayCan, CarFront, ShieldCheck,
-  Menu, Award, MapPin, Sparkles, Heart, User, Snowflake
+  Menu, Award, MapPin, Sparkles, Heart, User, Snowflake, Droplets
 } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger,
@@ -12,7 +12,7 @@ import {
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LOGO_BASE64, BRAND_NAME, BRAND_SLOGAN } from '@/lib/constants';
 const IconMap: Record<string, any> = {
-  SprayCan, CarFront, ShieldCheck, Award, MapPin, Sparkles, Heart, Star
+  SprayCan, CarFront, ShieldCheck, Award, MapPin, Sparkles, Heart, Star, Droplets
 };
 export function HomePage() {
   const isAuthenticated = useAuthStore(s => s.isAuthenticated);
@@ -31,8 +31,8 @@ export function HomePage() {
           <span className="text-xl font-black tracking-tighter uppercase text-shimmer">{BRAND_NAME}</span>
         </div>
         <div className="hidden md:flex items-center gap-8">
-          <a href="#services" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Services</a>
-          <a href="#reviews" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Reviews</a>
+          <a href="#services" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Operations</a>
+          <a href="#reviews" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Feedback</a>
           {isAuthenticated ? (
             <Button asChild variant="ghost" size="sm" className="gap-2 border-2 rounded-xl font-black uppercase text-[10px] tracking-widest">
               <Link to={portalPath}><User className="h-3 w-3" /> Portal</Link>
@@ -40,7 +40,7 @@ export function HomePage() {
           ) : (
             <Link to="/login" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Auth</Link>
           )}
-          <Button asChild className="bg-metallic text-white font-black uppercase tracking-widest h-11 px-6 rounded-xl hover:scale-105 transition-transform shadow-[0_0_20px_rgba(30,144,255,0.3)]">
+          <Button asChild className="bg-metallic text-white font-black uppercase tracking-widest h-11 px-6 rounded-xl hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,191,255,0.3)] border border-white/20">
             <Link to="/booking">Book Now</Link>
           </Button>
         </div>
@@ -57,7 +57,7 @@ export function HomePage() {
               ) : (
                 <SheetClose asChild><Link to="/login" className="text-lg font-black uppercase">Login</Link></SheetClose>
               )}
-              <Button asChild className="bg-metallic mt-4 h-14 font-black uppercase"><Link to="/booking">Book Experience</Link></Button>
+              <Button asChild className="bg-metallic mt-4 h-14 font-black uppercase border border-white/20"><Link to="/booking">Book Experience</Link></Button>
             </div>
           </SheetContent>
         </Sheet>
@@ -66,7 +66,7 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border-2 border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-12 animate-crackle">
             <Snowflake className="h-3 w-3" />
-            <span>Frozen Perfection in Every Yield</span>
+            <span>Frozen Perfection Starting at $50</span>
           </div>
           <h1 className="text-7xl md:text-9xl font-display font-black text-foreground mb-10 tracking-tighter leading-[0.8] text-shimmer">
             STAY FROSTY.<br />
@@ -76,7 +76,7 @@ export function HomePage() {
             {BRAND_SLOGAN}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-            <Button asChild size="lg" className="h-20 px-16 text-2xl font-black uppercase tracking-widest bg-metallic hover:scale-110 transition-transform shadow-2xl rounded-2xl">
+            <Button asChild size="lg" className="h-20 px-16 text-2xl font-black uppercase tracking-widest bg-metallic hover:scale-110 transition-transform shadow-2xl rounded-2xl border border-white/20">
               <Link to="/booking">START BOOKING <ChevronRight className="ml-2 h-8 w-8" /></Link>
             </Button>
             <Button variant="outline" size="lg" className="h-20 px-16 text-2xl font-black uppercase tracking-widest border-4 hover:bg-muted/50 rounded-2xl">
@@ -93,9 +93,9 @@ export function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[
-              { iconName: 'SprayCan', title: 'Arctic Exterior', desc: 'Icy hand wash, metallic decontamination, and high-gloss ceramic shield.' },
-              { iconName: 'CarFront', title: 'Deep Freeze Interior', desc: 'Sanitization, fabric extraction, and premium leather frosting.' },
-              { iconName: 'ShieldCheck', title: 'Stone Cold Full', desc: 'The complete arctic treatment. Paint correction and lifetime protection.' }
+              { iconName: 'Droplets', title: 'Basic Arctic Wash', desc: 'Starting at $50. Professional hand wash with icy rim shine and tire glaze.' },
+              { iconName: 'CarFront', title: 'Deep Freeze Interior', desc: '$100 Flat Rate. Steam sanitized, leather conditioned, and deep frost vacuum.' },
+              { iconName: 'Sparkles', title: 'Stone Cold Full', desc: '$180 - $220. The complete treatment. Clay bar, crystal wax, and interior rejuvenation.' }
             ].map((s, i) => {
               const Icon = IconMap[s.iconName] || SprayCan;
               return (

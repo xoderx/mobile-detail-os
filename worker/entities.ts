@@ -47,10 +47,10 @@ export class BookingEntity extends IndexedEntity<Booking> {
     id: "", customerId: "", vehicleSize: "sedan", packageId: "basic", dateTime: "", status: 'pending', totalPrice: 0, technicianId: "tech-1", checklist: {}
   };
   static seedData: Booking[] = [
-    { id: "b-1", customerId: "cust-1", vehicleSize: "luxury", packageId: "ceramic", dateTime: subDays(new Date(), 5).toISOString(), status: 'completed', totalPrice: 359, technicianId: "tech-1", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
-    { id: "b-2", customerId: "cust-2", vehicleSize: "suv", packageId: "premium", dateTime: subDays(new Date(), 1).toISOString(), status: 'completed', totalPrice: 169, technicianId: "tech-2", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
-    { id: "b-3", customerId: "cust-3", vehicleSize: "sedan", packageId: "basic", dateTime: addDays(new Date(), 1).toISOString(), status: 'confirmed', totalPrice: 89, technicianId: "tech-1", checklist: {} },
-    { id: "b-4", customerId: "cust-4", vehicleSize: "truck", packageId: "premium", dateTime: addDays(new Date(), 2).toISOString(), status: 'pending', totalPrice: 189, technicianId: "unassigned", checklist: {} },
+    { id: "b-1", customerId: "cust-1", vehicleSize: "luxury", packageId: "premium", dateTime: subDays(new Date(), 5).toISOString(), status: 'completed', totalPrice: 359, technicianId: "tech-1", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
+    { id: "b-2", customerId: "cust-2", vehicleSize: "suv", packageId: "full", dateTime: subDays(new Date(), 1).toISOString(), status: 'completed', totalPrice: 180, technicianId: "tech-2", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
+    { id: "b-3", customerId: "cust-3", vehicleSize: "sedan", packageId: "basic", dateTime: addDays(new Date(), 1).toISOString(), status: 'confirmed', totalPrice: 50, technicianId: "tech-1", checklist: {} },
+    { id: "b-4", customerId: "cust-4", vehicleSize: "truck", packageId: "full", dateTime: addDays(new Date(), 2).toISOString(), status: 'pending', totalPrice: 220, technicianId: "unassigned", checklist: {} },
   ];
 }
 export class SubscriptionEntity extends IndexedEntity<Subscription> {
@@ -68,9 +68,10 @@ export class ServiceTierEntity extends IndexedEntity<ServiceTier> {
   static readonly indexName = "service-tiers";
   static readonly initialState: ServiceTier = { id: "", name: "", price: 0, features: [], isPopular: false };
   static seedData: ServiceTier[] = [
-    { id: 'basic', name: 'Arctic Wash', price: 89, features: ['Icy Hand Wash', 'Rim Glaze', 'Interior Frost Vacuum'], isPopular: false },
-    { id: 'premium', name: 'Stone Cold Detail', price: 149, features: ['Signature Detail', 'Nano Clay Bar', 'Frozen Crystal Wax'], isPopular: true },
-    { id: 'ceramic', name: 'Diamond Shield', price: 299, features: ['Premium Detail Plus', 'Arctic Ceramic Coating'], isPopular: false },
+    { id: 'basic', name: 'Basic Wash', price: 50, features: ['Hand Wash', 'Rim Shine', 'Tire Dressing', 'Glass Wipe'], isPopular: false },
+    { id: 'interior', name: 'Interior Detail', price: 100, features: ['Steam Cleaning', 'Leather Conditioning', 'Deep Vacuum', 'Odor Neutralizer'], isPopular: false },
+    { id: 'full', name: 'Full Detail', price: 180, displayPrice: "$180 - $220", specialOffer: "$150 first-time visit", features: ['Signature Wash', 'Interior Detail', 'Nano Clay Bar', 'Frozen Crystal Wax'], isPopular: true },
+    { id: 'premium', name: 'Premium Detail', price: 280, displayPrice: "$280 - $350", features: ['Full Detail Plus', 'Arctic Ceramic Shield', 'Engine Glacier Clean', 'Lifetime Sealant'], isPopular: false },
   ];
 }
 export class AddOnEntity extends IndexedEntity<AddOn> {
@@ -78,9 +79,10 @@ export class AddOnEntity extends IndexedEntity<AddOn> {
   static readonly indexName = "addons";
   static readonly initialState: AddOn = { id: "", name: "", price: 0, description: "" };
   static seedData: AddOn[] = [
-    { id: 'engine', name: 'Engine Glacier Clean', price: 49, description: 'Deep arctic clean of engine compartment.' },
-    { id: 'pet', name: 'Arctic Pet Fur Removal', price: 30, description: 'Complete removal of stubborn pet fur.' },
-    { id: 'headlight', name: 'Crystal Clarity Restore', price: 60, description: 'Restore clarity to fogged headlights.' },
+    { id: 'engine', name: 'Engine Bay Clean', price: 40, description: 'Deep arctic clean of engine compartment.' },
+    { id: 'pet', name: 'Pet Fur Removal', price: 30, description: 'Complete removal of stubborn pet fur.' },
+    { id: 'headlight', name: 'Headlight Restore', price: 60, description: 'Restore clarity to fogged headlights.' },
+    { id: 'clay', name: 'Clay Bar Treatment', price: 50, description: 'Remove contaminants for a glass-smooth finish.' },
   ];
 }
 export class UserAccountEntity extends IndexedEntity<User> {
@@ -103,7 +105,7 @@ export class ConfigEntity extends IndexedEntity<AppConfig> {
     id: "global-settings",
     siteTitle: "Stone Cold Detailing",
     heroTitle: "Frozen Perfection. Metallic Shine.",
-    heroSubtitle: "Premium mobile automotive detailing with an icy precision finish. We bring the arctic clean to your driveway.",
+    heroSubtitle: "Premium mobile automotive detailing with an icy precision finish starting at just $50.",
     ctaText: "Book Your Experience",
     aboutText: "Stone Cold Detailing represents the pinnacle of mobile automotive care. Using icy precision and metallic-grade materials, we ensure your vehicle leaves with a showroom frost.",
     features: [
@@ -115,8 +117,8 @@ export class ConfigEntity extends IndexedEntity<AppConfig> {
       { id: 't1', author: 'Mark Stevens', role: 'Tesla Model S Owner', content: 'The finish is literally icy. Never seen my car look this metallic and clean.', rating: 5 }
     ],
     brandTheme: {
-      primaryColor: "#1E90FF",
-      gradientStart: "#1E90FF",
+      primaryColor: "#00BFFF",
+      gradientStart: "#00BFFF",
       gradientEnd: "#C0C0C0",
       fontScale: 1
     },

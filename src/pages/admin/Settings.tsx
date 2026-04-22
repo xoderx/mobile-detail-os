@@ -71,23 +71,23 @@ export default function Settings() {
                 <CardContent className="space-y-8">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <Label className="text-xs font-black uppercase tracking-widest">Arctic Primary (Icy)</Label>
+                      <Label className="text-xs font-black uppercase tracking-widest">Arctic Primary (Deep Sky Blue)</Label>
                       <div className="flex gap-3">
-                        <Input type="color" className="w-14 h-12 p-1 bg-transparent border-2 rounded-xl" value={config?.brandTheme?.primaryColor} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, primaryColor: e.target.value } })} />
-                        <Input value={config?.brandTheme?.primaryColor} readOnly className="font-mono text-sm border-2 rounded-xl" />
+                        <Input type="color" className="w-14 h-12 p-1 bg-transparent border-2 rounded-xl" value={config?.brandTheme?.primaryColor || '#00BFFF'} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, primaryColor: e.target.value } })} />
+                        <Input value={config?.brandTheme?.primaryColor || '#00BFFF'} readOnly className="font-mono text-sm border-2 rounded-xl" />
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <Label className="text-xs font-black uppercase tracking-widest">Metallic Secondary (Silver)</Label>
+                      <Label className="text-xs font-black uppercase tracking-widest">Metallic Accent (Silver)</Label>
                       <div className="flex gap-3">
-                        <Input type="color" className="w-14 h-12 p-1 bg-transparent border-2 rounded-xl" value={config?.brandTheme?.gradientEnd} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, gradientEnd: e.target.value } })} />
-                        <Input value={config?.brandTheme?.gradientEnd} readOnly className="font-mono text-sm border-2 rounded-xl" />
+                        <Input type="color" className="w-14 h-12 p-1 bg-transparent border-2 rounded-xl" value={config?.brandTheme?.gradientEnd || '#C0C0C0'} onChange={(e) => updateConfig.mutate({ brandTheme: { ...config.brandTheme, gradientEnd: e.target.value } })} />
+                        <Input value={config?.brandTheme?.gradientEnd || '#C0C0C0'} readOnly className="font-mono text-sm border-2 rounded-xl" />
                       </div>
                     </div>
                   </div>
                   <div className="p-6 rounded-[1.5rem] bg-muted/50 border-2 border-dashed border-primary/20 text-center">
                     <Snowflake className="h-8 w-8 text-primary/30 mx-auto mb-4 animate-crackle" />
-                    <p className="text-sm text-muted-foreground italic">Current palette generated for optimal high-contrast readability on deep black surfaces.</p>
+                    <p className="text-sm text-muted-foreground italic">Current palette tuned for #000000 pitch-black dark mode contrast.</p>
                   </div>
                 </CardContent>
               </Card>
@@ -108,23 +108,6 @@ export default function Settings() {
                     </div>
                     <Badge className="bg-emerald-500">PROTECTED</Badge>
                   </div>
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-50 ml-1">Business Integrity Logs</h4>
-                    <div className="space-y-2">
-                       <div className="flex items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/50 text-xs">
-                        <Activity className="h-4 w-4 text-primary" />
-                        <span className="font-bold">Handshake:</span> 
-                        <span className="text-muted-foreground">Turnstile Session Validated for IP 192.x.x.x</span>
-                        <span className="ml-auto opacity-50 font-mono">12s ago</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/50 text-xs">
-                        <Server className="h-4 w-4 text-secondary" />
-                        <span className="font-bold">Durable Object:</span> 
-                        <span className="text-muted-foreground">Index consistency check completed successfully.</span>
-                        <span className="ml-auto opacity-50 font-mono">5m ago</span>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -132,7 +115,7 @@ export default function Settings() {
         </div>
         <div className="lg:col-span-5">
           <div className="sticky top-28 border border-border/50 rounded-[3rem] bg-card overflow-hidden h-[750px] shadow-2xl relative">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(30,144,255,0.05),transparent)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,191,255,0.05),transparent)] pointer-events-none" />
             <div className="bg-muted/50 border-b border-border/50 px-6 py-3 flex items-center justify-between">
               <div className="flex gap-2">
                 <div className="h-2.5 w-2.5 rounded-full bg-destructive/40" />
@@ -144,7 +127,7 @@ export default function Settings() {
             <div className="origin-top-left transition-all duration-500 overflow-y-auto h-full scrollbar-hide" style={{ transform: `scale(${previewScale})` }}>
               <div className="bg-background min-h-full p-12 m-6 rounded-[2rem] shadow-xl border border-border/20">
                 <div className="flex items-center gap-2 mb-12">
-                   <div className="h-6 w-6 bg-primary rounded" />
+                   <div className="h-6 w-6 bg-brand-500 rounded" />
                    <span className="text-sm font-black tracking-tighter uppercase">Stone Cold</span>
                 </div>
                 <h1 className="text-4xl font-black tracking-tighter leading-none text-shimmer" style={{ color: config?.brandTheme?.primaryColor }}>
@@ -156,16 +139,6 @@ export default function Settings() {
                 <Button className="mt-10 h-12 px-8 font-black uppercase tracking-wider bg-metallic shadow-lg" style={{ backgroundColor: config?.brandTheme?.primaryColor }}>
                   {config?.ctaText}
                 </Button>
-                <div className="mt-16 grid grid-cols-2 gap-4">
-                  <div className="h-24 glass-ice rounded-2xl p-4">
-                    <div className="h-2 w-12 bg-primary/20 rounded mb-2" />
-                    <div className="h-1.5 w-full bg-muted rounded" />
-                  </div>
-                  <div className="h-24 glass-ice rounded-2xl p-4">
-                    <div className="h-2 w-12 bg-primary/20 rounded mb-2" />
-                    <div className="h-1.5 w-full bg-muted rounded" />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
