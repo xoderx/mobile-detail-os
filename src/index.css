@@ -63,7 +63,7 @@
 }
 @layer components {
   .bg-metallic {
-    background: linear-gradient(135deg, var(--primary) 0%, #1E90FF 40%, var(--secondary) 70%, #FFFFFF 100%);
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.95) 0%, hsla(195 100% 50% / 0.92) 40%, hsl(var(--secondary) / 0.88) 70%, hsla(0 0% 100% / 0.25) 100%);
     background-size: 200% 200%;
   }
   .glass-ice {
