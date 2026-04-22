@@ -23,6 +23,8 @@ export function ContactForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [checkoutStatus, setCheckoutStatus] = useState('Securing session...');
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
+  const widgetRef = useRef<HTMLDivElement>(null);
   const setStep = useBookingStore(s => s.setStep);
   const contact = useBookingStore(s => s.contact);
   const setContact = useBookingStore(s => s.setContact);
@@ -34,18 +36,57 @@ export function ContactForm() {
   const getTotalPrice = useBookingStore(s => s.getTotalPrice);
   const user = useAuthStore(s => s.user);
   useEffect(() => {
+    let mounted = true;
     const SCRIPT_ID = 'cf-turnstile-script';
-    const existingScript = document.getElementById(SCRIPT_ID);
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.id = SCRIPT_ID;
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
-    }
-    (window as any).onTurnstileSuccess = (token: string) => {
-      setTurnstileToken(token);
+    
+    const loadTurnstile = () => {
+      if ((window as any).turnstile) {
+        renderTurnstile();
+        return;
+      }
+      
+      const existingScript = document.getElementById(SCRIPT_ID);
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = SCRIPT_ID;
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          if (mounted) renderTurnstile();
+        };
+        document.body.appendChild(script);
+      } else {
+        renderTurnstile();
+      }
+    };
+
+    const renderTurnstile = () => {
+      if (!widgetRef.current || widgetIdRef.current) return;
+      
+      const widget = (window as any).turnstile.render(widgetRef.current, {
+        sitekey: '1x00000000000000000000AA',
+        callback: (token: string) => {
+          if (mounted) setTurnstileToken(token);
+        },
+        'error-callback': () => {
+          if (mounted) setTurnstileToken(null);
+        },
+        theme: 'auto'
+      });
+
+      if (mounted && widget) {
+        widgetIdRef.current = widget;
+      }
+    };
+
+    loadTurnstile();
+
+    return () => {
+      mounted = false;
+      if (widgetIdRef.current && (window as any).turnstile) {
+        (window as any).turnstile.remove(widgetIdRef.current);
+      }
     };
   }, []);
   const { register, handleSubmit, formState: { errors } } = useForm<ContactValues>({
@@ -89,10 +130,10 @@ export function ContactForm() {
     } catch (error) {
       setIsRedirecting(false);
       console.error('Booking submission failed:', error);
-      if ((window as any).turnstile) {
-        (window as any).turnstile.reset();
-        setTurnstileToken(null);
+      if (widgetIdRef.current && (window as any).turnstile) {
+        (window as any).turnstile.reset(widgetIdRef.current);
       }
+      setTurnstileToken(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -154,12 +195,8 @@ export function ContactForm() {
           <Input {...register('address')} className={`h-14 border-2 rounded-xl text-sm font-bold ${errors.address ? 'border-destructive' : 'border-border focus:border-primary'}`} />
         </div>
         <div className="py-6 border-y-2 border-border/40 flex flex-col items-center min-h-[100px] justify-center">
-          <div
-            className="cf-turnstile"
-            data-sitekey="1x00000000000000000000AA"
-            data-callback="onTurnstileSuccess"
-          ></div>
-          {!turnstileToken && (
+          <div ref={widgetRef} />
+          {!turnstileToken && !isSubmitting && (
             <p className="text-[9px] text-amber-600 mt-3 font-black uppercase tracking-[0.2em] flex items-center gap-2 animate-pulse">
               <ShieldAlert className="h-3 w-3" /> Hardware Attestation Required
             </p>

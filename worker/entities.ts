@@ -21,6 +21,15 @@ export interface Booking {
   technicianId?: string;
   location?: string;
   checklist: Record<string, boolean>;
+  addOns?: string[];
+  contact?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+  turnstileToken?: string;
 }
 export interface Subscription {
   id: string;
@@ -56,12 +65,12 @@ export class BookingEntity extends IndexedEntity<Booking> {
   static readonly entityName = "booking";
   static readonly indexName = "bookings";
   static readonly initialState: Booking = {
-    id: "", customerId: "", vehicleSize: "sedan", packageId: "basic", dateTime: "", status: 'pending', totalPrice: 0, technicianId: "tech-1", checklist: {}
+    id: "", customerId: "", vehicleSize: "sedan", packageId: "basic", dateTime: "", status: 'pending', totalPrice: 0, technicianId: "tech-1", checklist: {}, addOns: [], contact: undefined, turnstileToken: undefined
   };
   static seedData: Booking[] = [
-    { id: "b-1", customerId: "cust-1", vehicleSize: "luxury", packageId: "premium", dateTime: subDays(new Date(), 5).toISOString(), status: 'completed', totalPrice: 359, technicianId: "tech-1", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
-    { id: "b-2", customerId: "cust-2", vehicleSize: "suv", packageId: "full", dateTime: subDays(new Date(), 1).toISOString(), status: 'completed', totalPrice: 180, technicianId: "tech-2", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true } },
-    { id: "b-3", customerId: "cust-3", vehicleSize: "sedan", packageId: "basic", dateTime: addDays(new Date(), 1).toISOString(), status: 'confirmed', totalPrice: 50, technicianId: "tech-1", checklist: {} },
+    { id: "b-1", customerId: "cust-1", vehicleSize: "luxury", packageId: "premium", dateTime: subDays(new Date(), 5).toISOString(), status: 'completed', totalPrice: 359, technicianId: "tech-1", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true }, addOns: [], contact: undefined, turnstileToken: undefined },
+    { id: "b-2", customerId: "cust-2", vehicleSize: "suv", packageId: "full", dateTime: subDays(new Date(), 1).toISOString(), status: 'completed', totalPrice: 180, technicianId: "tech-2", checklist: { 'Exterior Wash': true, 'Wheel Cleaning': true, 'Interior Vacuum': true, 'Glass Cleaning': true, 'Tire Dressing': true }, addOns: [], contact: undefined, turnstileToken: undefined },
+    { id: "b-3", customerId: "cust-3", vehicleSize: "sedan", packageId: "basic", dateTime: addDays(new Date(), 1).toISOString(), status: 'confirmed', totalPrice: 50, technicianId: "tech-1", checklist: {}, addOns: [], contact: undefined, turnstileToken: undefined },
   ];
 }
 export class SubscriptionEntity extends IndexedEntity<Subscription> {
