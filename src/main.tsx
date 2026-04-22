@@ -1,7 +1,6 @@
 import '@/lib/errorReporter';
 import { enableMapSet } from "immer";
 enableMapSet();
-
 import { createRoot } from 'react-dom/client'
 import {
   createBrowserRouter,
@@ -14,6 +13,9 @@ import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import { BookingWizard } from '@/pages/booking/BookingWizard'
 import { LoginPage } from '@/pages/LoginPage'
+import { AdminLoginPage } from '@/pages/admin/AdminLoginPage'
+import { SignupPage } from '@/pages/SignupPage'
+import { PricingPage } from '@/pages/PricingPage'
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { Dashboard } from '@/pages/admin/Dashboard'
 import Customers from '@/pages/admin/Customers'
@@ -33,6 +35,16 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
   },
   {
+    path: "/pricing",
+    element: <PricingPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/signup",
+    element: <SignupPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
     path: "/booking",
     element: <BookingWizard />,
     errorElement: <RouteErrorBoundary />,
@@ -40,6 +52,11 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin/login",
+    element: <AdminLoginPage />,
     errorElement: <RouteErrorBoundary />,
   },
   {
