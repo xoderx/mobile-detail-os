@@ -41,6 +41,10 @@ export function HomePage() {
       setLoading(false);
     }
   };
+  const heroTitle = config?.heroTitle || 'FROZEN PERFECTION.';
+  const titleParts = heroTitle.split(' ');
+  const firstWord = titleParts[0];
+  const restOfTitle = titleParts.slice(1).join(' ');
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 ice-crack-pattern opacity-[0.03] pointer-events-none" />
@@ -98,10 +102,10 @@ export function HomePage() {
                 <span>Premium Arctic Care</span>
               </div>
               <h1 className="text-6xl md:text-8xl font-display font-black text-white mb-8 tracking-tighter leading-[0.85] text-shimmer uppercase">
-                {config?.heroTitle?.split(' ').slice(0, 1) || 'FROZEN'} <br /> {config?.heroTitle?.split(' ').slice(1).join(' ') || 'PERFECTION.'}
+                {firstWord} <br /> {restOfTitle}
               </h1>
               <p className="text-lg md:text-xl text-slate-300 mb-12 font-black uppercase tracking-tight opacity-80 max-w-lg">
-                {config?.heroSubtitle}
+                {config?.heroSubtitle || "Premium mobile automotive detailing with an icy precision finish."}
               </p>
               <div className="flex flex-col sm:flex-row gap-6">
                 <Button asChild size="lg" className="h-16 px-10 text-lg font-black uppercase tracking-widest bg-metallic rounded-2xl shadow-xl shadow-primary/20 border-t border-white/20">
