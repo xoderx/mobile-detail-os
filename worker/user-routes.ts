@@ -168,7 +168,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/feedback', async (c) => {
     const form = await c.req.json<{rating: number; comment?: string; customerId?: string}>();
     if (!form.rating || form.rating < 1 || form.rating > 5 || !Number.isInteger(form.rating)) return bad(c, 'Rating must be 1-5 stars');
-    const feedback = await FeedbackEntity.create(c.env, { id: crypto.randomUUID(), rating: form.rating, comment: form.comment || '', customerId: form.customerId || null, createdAt: Date.now() });
+    const feedback = await FeedbackEntity.create(c.env, { id: crypto.randomUUID(), rating: form.rating, comment: form.comment || '', customerId: form.customerId ?? undefined, createdAt: Date.now() });
     return ok(c, feedback);
   });
 
