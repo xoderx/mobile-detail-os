@@ -143,9 +143,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/customers', async (c) => ok(c, await CustomerEntity.list(c.env)));
   app.get('/api/subscriptions', async (c) => ok(c, await SubscriptionEntity.list(c.env)));
-  app.get('/api/weather', (c) => ok(c, Array.from({ length: 7 }).map((_, i) => ({ 
-    date: format(addDays(new Date(), i), 'yyyy-MM-dd'), 
-    condition: i % 3 === 0 ? 'Cloudy' : 'Sunny', 
-    temp: 70 + i 
+  app.get('/api/weather', (c) => ok(c, Array.from({ length: 7 }).map((_, i) => ({
+    date: format(addDays(new Date(), i), 'yyyy-MM-dd'),
+    condition: i % 3 === 0 ? 'Cloudy' : 'Sunny',
+    temp: 70 + i
   }))));
+}
+
 import { format, addDays } from "date-fns";
