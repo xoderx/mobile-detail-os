@@ -154,6 +154,21 @@ export class UserAccountEntity extends IndexedEntity<User> {
   }
 }
 
+export interface Feedback {
+  id: string;
+  rating: number;
+  comment?: string;
+  customerId?: string;
+  createdAt: number;
+}
+
+export class FeedbackEntity extends IndexedEntity<Feedback> {
+  static readonly entityName = "feedback";
+  static readonly indexName = "feedbacks";
+  static readonly initialState: Feedback = { id: "", rating: 0, createdAt: 0 };
+  static seedData: Feedback[] = [];
+}
+
 export class ConfigEntity extends IndexedEntity<AppConfig> {
   static readonly entityName = "config";
   static readonly indexName = "configs";

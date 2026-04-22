@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
-import { CustomerEntity, BookingEntity, SubscriptionEntity, ServiceTierEntity, AddOnEntity, ConfigEntity, UserAccountEntity } from "./entities";
+import { CustomerEntity, BookingEntity, SubscriptionEntity, ServiceTierEntity, AddOnEntity, ConfigEntity, UserAccountEntity, FeedbackEntity } from "./entities";
 import { ok, bad, notFound } from './core-utils';
 import { addDays, format } from 'date-fns';
 // RATE LIMITER HELPER (DO BACKED)
@@ -163,6 +163,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, res);
   });
   app.post('/api/payments/create-session', async (c) => ok(c, { url: '#' }));
+
+  // FEEDBACK
+  app.post('/api/feedback', async (c) => {
+    const form = await c.req.json<{rating: number; comment?: string; customerId?: string}>();
+    if (!form.rating || form.rating < 1 || form.rating > 5 || !Number.isInteger(form.rating)) return bad(c, 'Rating must be 1-5 stars');
+    const feedback = await FeedbackEntity.create(c.env, { id: crypto.randomUUID(), rating: form.rating, comment: form.comment || '', customerId: form.customerId || null, createdAt: Date.now() });
+    return ok(c, feedback);
+  });
 
   // USER MANAGEMENT
   app.get('/api/users', async (c) => {
