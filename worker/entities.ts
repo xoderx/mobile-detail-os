@@ -20,7 +20,7 @@ export interface Booking {
   totalPrice: number;
   technicianId?: string;
   location?: string;
-  checklist?: Record<string, boolean>;
+  checklist: Record<string, boolean>;
 }
 export interface Subscription {
   id: string;

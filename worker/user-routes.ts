@@ -35,7 +35,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await initializeStore(c.env);
     return ok(c, await AddOnEntity.list(c.env));
   });
-  // AUTH & USERS
+  // AUTH & SECURITY
+  app.post('/api/auth/verify-turnstile', async (c) => {
+    const { token } = await c.req.json();
+    if (!token) return bad(c, 'Security token missing');
+    // In a real app, verify with Cloudflare API. Here we handshake success.
+    return ok(c, { verified: true });
+  });
   app.post('/api/auth/register', async (c) => {
     const { name, email, password, role, phoneNumber } = await c.req.json();
     if (!email || !name) return bad(c, 'Required fields missing');
@@ -120,13 +126,32 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const customer = state.customerId ? await new CustomerEntity(c.env, state.customerId).getState() : null;
     return ok(c, { ...state, contact: customer || { firstName: 'Guest', lastName: 'Client' } });
   });
+  app.post('/api/bookings/:id/assign', async (c) => {
+    const { technicianId } = await c.req.json();
+    const id = c.req.param('id');
+    const entity = new BookingEntity(c.env, id);
+    await entity.patch({ technicianId });
+    return ok(c, { success: true });
+  });
   app.patch('/api/bookings/:id/status', async (c) => {
     const { status } = await c.req.json();
     const entity = new BookingEntity(c.env, c.req.param('id'));
     await entity.patch({ status });
     return ok(c, { success: true });
   });
+  app.patch('/api/bookings/:id/checklist', async (c) => {
+    const { checklist } = await c.req.json();
+    const entity = new BookingEntity(c.env, c.req.param('id'));
+    await entity.patch({ checklist });
+    return ok(c, { success: true });
+  });
   app.get('/api/customers', async (c) => ok(c, await CustomerEntity.list(c.env)));
   app.get('/api/subscriptions', async (c) => ok(c, await SubscriptionEntity.list(c.env)));
-  app.get('/api/weather', (c) => ok(c, Array.from({ length: 7 }).map((_, i) => ({ date: new Date().toISOString(), condition: 'Sunny', temp: 72 }))));
+  app.get('/api/weather', (c) => ok(c, Array.from({ length: 7 }).map((_, i) => ({ 
+    date: format(addDays(new Date(), i), 'yyyy-MM-dd'), 
+    condition: i % 3 === 0 ? 'Cloudy' : 'Sunny', 
+    temp: 70 + i 
+  }))));
 }
+// Helper imports for weather date formatting
+import { format, addDays } from "date-fns";
