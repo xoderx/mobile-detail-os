@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LOGO_BASE64, BRAND_NAME, BRAND_SLOGAN } from '@/lib/constants';
+import { Logo } from '@/components/Logo';
 const IconMap: Record<string, any> = {
   SprayCan, CarFront, ShieldCheck, Award, MapPin, Sparkles, Heart, Star, Droplets
 };
@@ -27,7 +28,7 @@ export function HomePage() {
       <ThemeToggle />
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <img src={LOGO_BASE64} alt={BRAND_NAME} className="h-12 w-12 animate-shimmer filter brightness-110" />
+          <Logo className="h-12 w-12 animate-shimmer filter brightness-110" alt={BRAND_NAME} />
           <span className="text-xl font-black tracking-tighter uppercase text-shimmer">{BRAND_NAME}</span>
         </div>
         <div className="hidden md:flex items-center gap-8">
@@ -40,9 +41,9 @@ export function HomePage() {
           ) : (
             <Link to="/login" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Auth</Link>
           )}
-          <Button asChild className="bg-metallic text-white font-black uppercase tracking-widest h-11 px-6 rounded-xl hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,191,255,0.3)] border border-white/20">
-            <Link to="/booking">Book Now</Link>
-          </Button>
+            <Button asChild className="bg-metallic text-primary-foreground font-black uppercase tracking-widest h-11 px-6 rounded-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.5)] drop-shadow-2xl border border-primary/30">
+              <Link to="/booking">Book Now</Link>
+            </Button>
         </div>
         <Sheet>
           <SheetTrigger asChild className="md:hidden">
@@ -57,7 +58,7 @@ export function HomePage() {
               ) : (
                 <SheetClose asChild><Link to="/login" className="text-lg font-black uppercase">Login</Link></SheetClose>
               )}
-              <Button asChild className="bg-metallic mt-4 h-14 font-black uppercase border border-white/20"><Link to="/booking">Book Experience</Link></Button>
+              <Button asChild className="bg-metallic mt-4 h-14 font-black uppercase border border-primary/30 text-primary-foreground drop-shadow-2xl shadow-[0_0_30px_rgba(255,255,255,0.5)]"><Link to="/booking">Book Experience</Link></Button>
             </div>
           </SheetContent>
         </Sheet>
@@ -68,7 +69,7 @@ export function HomePage() {
             <Snowflake className="h-3 w-3" />
             <span>Frozen Perfection Starting at $50</span>
           </div>
-          <img src={LOGO_BASE64} alt={BRAND_NAME} className="h-20 w-20 mx-auto mb-8 opacity-80 animate-shimmer filter brightness-110 drop-shadow-lg" />
+          <Logo className="h-20 w-20 mx-auto mb-8 opacity-80 animate-shimmer filter brightness-110 drop-shadow-lg" alt={BRAND_NAME} />
           <h1 className="text-7xl md:text-9xl font-display font-black text-foreground mb-10 tracking-tighter leading-[0.8] text-shimmer">
             STAY FROSTY.<br />
             <span className="text-primary">DRIVE METALLIC.</span>
@@ -77,7 +78,7 @@ export function HomePage() {
             {BRAND_SLOGAN}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-            <Button asChild size="lg" className="h-20 px-16 text-2xl font-black uppercase tracking-widest bg-metallic hover:scale-110 transition-transform shadow-2xl rounded-2xl border border-white/20">
+            <Button asChild size="lg" className="h-20 px-16 text-2xl font-black uppercase tracking-widest bg-metallic hover:scale-110 transition-transform shadow-2xl rounded-2xl border border-primary/30 text-primary-foreground drop-shadow-2xl shadow-[0_0_30px_rgba(255,255,255,0.5)]">
               <Link to="/booking">START BOOKING <ChevronRight className="ml-2 h-8 w-8" /></Link>
             </Button>
             <Button variant="outline" size="lg" className="h-20 px-16 text-2xl font-black uppercase tracking-widest border-4 hover:bg-muted/50 rounded-2xl">
@@ -114,7 +115,7 @@ export function HomePage() {
       </section>
       <footer className="py-24 bg-card border-t-2 border-border/50 text-center space-y-12">
         <div className="flex items-center justify-center gap-4">
-          <img src={LOGO_BASE64} alt={BRAND_NAME} className="h-12 w-12 opacity-70" />
+          <Logo className="h-12 w-12 opacity-70" alt={BRAND_NAME} />
           <span className="text-3xl font-black tracking-tighter uppercase opacity-80">{BRAND_NAME}</span>
         </div>
         <p className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em] max-w-2xl mx-auto leading-loose opacity-60">
