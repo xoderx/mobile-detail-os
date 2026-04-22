@@ -63,14 +63,14 @@
 }
 @layer components {
   .bg-metallic {
-    background: linear-gradient(135deg, #00BFFF 0%, #1E90FF 40%, #C0C0C0 70%, #FFFFFF 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, #1E90FF 40%, var(--secondary) 70%, #FFFFFF 100%);
     background-size: 200% 200%;
   }
   .glass-ice {
     @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_20px_rgba(0,191,255,0.15)];
   }
   .text-shimmer {
-    @apply bg-clip-text text-transparent bg-[linear-gradient(110deg,#00BFFF,45%,#fff,55%,#00BFFF)] bg-[length:200%_100%] animate-shimmer;
+    @apply bg-clip-text text-transparent bg-[linear-gradient(110deg,var(--primary),45%,#fff,55%,var(--primary))] bg-[length:200%_100%] animate-shimmer;
   }
   .ice-crack-pattern {
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300bfff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6zM36 4V0h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");

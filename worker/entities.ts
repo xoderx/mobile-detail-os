@@ -1,6 +1,8 @@
 import { IndexedEntity } from "./core-utils";
+import type { Env } from './core-utils';
 import type { ServiceTier, AddOn, AppConfig, User, VehicleSize } from "@shared/types";
 import { subDays, addDays } from "date-fns";
+
 export interface Customer {
   id: string;
   firstName: string;
@@ -9,6 +11,7 @@ export interface Customer {
   phone: string;
   lastServiceDate?: number;
 }
+
 export interface Booking {
   id: string;
   customerId: string;
@@ -21,6 +24,7 @@ export interface Booking {
   location?: string;
   checklist?: Record<string, boolean>;
 }
+
 export interface Subscription {
   id: string;
   customerId: string;
@@ -29,6 +33,7 @@ export interface Subscription {
   nextRenewal: number;
   price: number;
 }
+
 export class CustomerEntity extends IndexedEntity<Customer> {
   static readonly entityName = "customer";
   static readonly indexName = "customers";
@@ -39,7 +44,17 @@ export class CustomerEntity extends IndexedEntity<Customer> {
     { id: "cust-3", firstName: "Marcus", lastName: "Thorne", email: "m.thorne@techcorp.io", phone: "555-0103" },
     { id: "cust-4", firstName: "Sarah", lastName: "Jenkins", email: "sarahj@me.com", phone: "555-0104", lastServiceDate: subDays(new Date(), 2).getTime() },
   ];
+
+  static async ensureSeed(env: Env): Promise<void> {
+    const page = await CustomerEntity.list(env);
+    if (page.items.length === 0) {
+      for (const data of CustomerEntity.seedData) {
+        await CustomerEntity.create(env, data);
+      }
+    }
+  }
 }
+
 export class BookingEntity extends IndexedEntity<Booking> {
   static readonly entityName = "booking";
   static readonly indexName = "bookings";
@@ -53,6 +68,7 @@ export class BookingEntity extends IndexedEntity<Booking> {
     { id: "b-4", customerId: "cust-4", vehicleSize: "truck", packageId: "full", dateTime: addDays(new Date(), 2).toISOString(), status: 'pending', totalPrice: 220, technicianId: "unassigned", checklist: {} },
   ];
 }
+
 export class SubscriptionEntity extends IndexedEntity<Subscription> {
   static readonly entityName = "subscription";
   static readonly indexName = "subscriptions";
@@ -62,7 +78,17 @@ export class SubscriptionEntity extends IndexedEntity<Subscription> {
     { id: "s-2", customerId: "cust-2", planType: "premium", status: "active", nextRenewal: addDays(new Date(), 22).getTime(), price: 129 },
     { id: "s-3", customerId: "cust-4", planType: "basic", status: "active", nextRenewal: addDays(new Date(), 5).getTime(), price: 79 },
   ];
+
+  static async ensureSeed(env: Env): Promise<void> {
+    const page = await SubscriptionEntity.list(env);
+    if (page.items.length === 0) {
+      for (const data of SubscriptionEntity.seedData) {
+        await SubscriptionEntity.create(env, data);
+      }
+    }
+  }
 }
+
 export class ServiceTierEntity extends IndexedEntity<ServiceTier> {
   static readonly entityName = "service-tier";
   static readonly indexName = "service-tiers";
@@ -70,10 +96,20 @@ export class ServiceTierEntity extends IndexedEntity<ServiceTier> {
   static seedData: ServiceTier[] = [
     { id: 'basic', name: 'Basic Wash', price: 50, features: ['Hand Wash', 'Rim Shine', 'Tire Dressing', 'Glass Wipe'], isPopular: false },
     { id: 'interior', name: 'Interior Detail', price: 100, features: ['Steam Cleaning', 'Leather Conditioning', 'Deep Vacuum', 'Odor Neutralizer'], isPopular: false },
-    { id: 'full', name: 'Full Detail', price: 180, displayPrice: "$180 - $220", specialOffer: "$150 first-time visit", features: ['Signature Wash', 'Interior Detail', 'Nano Clay Bar', 'Frozen Crystal Wax'], isPopular: true },
-    { id: 'premium', name: 'Premium Detail', price: 280, displayPrice: "$280 - $350", features: ['Full Detail Plus', 'Arctic Ceramic Shield', 'Engine Glacier Clean', 'Lifetime Sealant'], isPopular: false },
+    { id: 'full', name: 'Full Detail', price: 180, features: ['Signature Wash', 'Interior Detail', 'Nano Clay Bar', 'Frozen Crystal Wax'], displayPrice: '$180 - $220', specialOffer: '$150 first-time visit', isPopular: true },
+    { id: 'premium', name: 'Premium Detail', price: 280, features: ['Full Detail Plus', 'Arctic Ceramic Shield', 'Engine Glacier Clean', 'Lifetime Sealant'], displayPrice: '$280 - $350', isPopular: false },
   ];
+
+  static async ensureSeed(env: Env): Promise<void> {
+    const page = await ServiceTierEntity.list(env);
+    if (page.items.length === 0) {
+      for (const data of ServiceTierEntity.seedData) {
+        await ServiceTierEntity.create(env, data);
+      }
+    }
+  }
 }
+
 export class AddOnEntity extends IndexedEntity<AddOn> {
   static readonly entityName = "addon";
   static readonly indexName = "addons";
@@ -84,7 +120,17 @@ export class AddOnEntity extends IndexedEntity<AddOn> {
     { id: 'headlight', name: 'Headlight Restore', price: 60, description: 'Restore clarity to fogged headlights.' },
     { id: 'clay', name: 'Clay Bar Treatment', price: 50, description: 'Remove contaminants for a glass-smooth finish.' },
   ];
+
+  static async ensureSeed(env: Env): Promise<void> {
+    const page = await AddOnEntity.list(env);
+    if (page.items.length === 0) {
+      for (const data of AddOnEntity.seedData) {
+        await AddOnEntity.create(env, data);
+      }
+    }
+  }
 }
+
 export class UserAccountEntity extends IndexedEntity<User> {
   static readonly entityName = "user-account";
   static readonly indexName = "user-accounts";
@@ -97,7 +143,17 @@ export class UserAccountEntity extends IndexedEntity<User> {
     { id: "tech-2", name: "Sarah Miller", email: "sarah@stonecold.com", role: "tech", isActive: true, createdAt: Date.now() },
     { id: "cust-1", name: "Demo Customer", email: "customer@gmail.com", role: "customer", isActive: true, createdAt: Date.now() },
   ];
+
+  static async ensureSeed(env: Env): Promise<void> {
+    const page = await UserAccountEntity.list(env);
+    if (page.items.length === 0) {
+      for (const data of UserAccountEntity.seedData) {
+        await UserAccountEntity.create(env, data);
+      }
+    }
+  }
 }
+
 export class ConfigEntity extends IndexedEntity<AppConfig> {
   static readonly entityName = "config";
   static readonly indexName = "configs";
@@ -126,3 +182,4 @@ export class ConfigEntity extends IndexedEntity<AppConfig> {
     keys: { stripePublicKey: "pk_test_placeholder", twilioSid: "AC_placeholder" }
   };
 }
+//
