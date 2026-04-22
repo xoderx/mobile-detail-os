@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { LOGO_BASE64, BRAND_SHORT_NAME } from "@/lib/constants";
+import { Logo } from '@/components/Logo';
 function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ function AppSidebar() {
     <Sidebar className="border-r-2 border-sidebar-border/50 bg-sidebar/50 backdrop-blur-md">
       <SidebarHeader className="p-8">
         <div className="flex items-center gap-3">
-          <img src={LOGO_BASE64} alt={BRAND_SHORT_NAME} className="h-12 w-12 animate-shimmer" />
+          <Logo className="h-12 w-12 animate-shimmer" alt={BRAND_SHORT_NAME} />
           <span className="text-xl font-black tracking-tighter uppercase text-shimmer">{BRAND_SHORT_NAME}</span>
         </div>
       </SidebarHeader>

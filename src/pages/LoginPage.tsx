@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Hammer, User as UserIcon, Snowflake } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 import { motion } from 'framer-motion';
 import { LOGO_BASE64, BRAND_SHORT_NAME } from '@/lib/constants';
 export function LoginPage() {
@@ -33,7 +34,7 @@ export function LoginPage() {
         <Card className="border-2 border-primary/10 shadow-2xl rounded-[3rem] overflow-hidden glass-ice">
           <CardHeader className="text-center space-y-4 py-12 border-b-2 border-primary/10 bg-muted/30">
             <div className="mx-auto h-20 w-20 rounded-[2rem] bg-primary flex items-center justify-center text-white mb-2 shadow-[0_0_40px_rgba(30,144,255,0.4)] animate-shimmer relative overflow-hidden border-2 border-white/20">
-              <img src={LOGO_BASE64} alt={BRAND_SHORT_NAME} className="h-10 w-10 brightness-200" />
+              <Logo className="h-10 w-10 brightness-200" alt={BRAND_SHORT_NAME} />
             </div>
             <CardTitle className="text-4xl font-black tracking-tighter uppercase text-shimmer">{BRAND_SHORT_NAME} OPS</CardTitle>
             <CardDescription className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/80">AUTHENTICATE COMMAND PORTAL ACCESS</CardDescription>
