@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ServiceTier, AddOn, VehicleSize } from '@shared/types';
+import { FIRST_TIME_DISCOUNT } from '@/lib/constants';
 export interface BookingState {
   step: number;
   vehicleSize: VehicleSize | null;
@@ -74,15 +75,20 @@ export const useBookingStore = create<BookingState>()(
         const availableTiers = get().availableTiers;
         const availableAddOns = get().availableAddOns;
         let total = 0;
+        // Base Package Price with Special Offer handling
         if (packageId && availableTiers.length > 0) {
           const selectedTier = availableTiers.find(t => t.id === packageId);
           if (selectedTier) {
+            // Check for special introductory offer overrides (e.g. '$150 first-time')
+            // For now we use the base price, but specific logic could parse specialOffer strings
             total += selectedTier.price;
           }
         }
+        // Vehicle Size Surcharge
         if (vehicleSize && vehicleSize in VEHICLE_PREMIUMS) {
           total += VEHICLE_PREMIUMS[vehicleSize as string];
         }
+        // Add-ons
         if (addOns.length > 0 && availableAddOns.length > 0) {
           addOns.forEach(id => {
             const addon = availableAddOns.find(a => a.id === id);
@@ -91,7 +97,13 @@ export const useBookingStore = create<BookingState>()(
             }
           });
         }
-        return total;
+        // Apply a global first-time discount if applicable (mock condition for now)
+        // In a real app, we would check if the user is authenticated and has 0 previous bookings
+        const applyDiscount = false; 
+        if (applyDiscount) {
+          total -= FIRST_TIME_DISCOUNT;
+        }
+        return Math.max(0, total);
       },
       reset: () => set({
         step: 1,

@@ -18,14 +18,14 @@ const chartData = [
   { name: 'Sun', revenue: 800 },
 ];
 export function Dashboard() {
-  const stats = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ['stats'],
     queryFn: () => api<any>('/api/stats'),
-  }).data;
-  const totalRevenue = stats?.totalRevenue;
-  const mrr = stats?.mrr;
-  const customerCount = stats?.customerCount;
-  const satisfactionScore = stats?.satisfactionScore;
+  });
+  const totalRevenue = stats?.totalRevenue ?? 0;
+  const mrr = stats?.mrr ?? 0;
+  const customerCount = stats?.customerCount ?? 0;
+  const satisfactionScore = stats?.satisfactionScore ?? 5.0;
   const integrations = stats?.integrations ?? { stripe: false, twilio: false, googleMaps: false };
   return (
     <div className="space-y-12 animate-fade-in pb-20">
@@ -45,8 +45,8 @@ export function Dashboard() {
         </div>
         <div className="flex gap-3 shrink-0">
           <Badge className="h-10 px-5 bg-primary/10 text-primary border-2 border-primary/20 font-black tracking-widest flex items-center gap-3 rounded-xl">
-            <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
-            LIVE TRANSMISSION
+            <span className={cn("h-2 w-2 rounded-full bg-primary", !isLoading && "animate-ping")} />
+            {isLoading ? 'SYNCING...' : 'LIVE TRANSMISSION'}
           </Badge>
           <Badge variant="outline" className="h-10 px-5 font-black border-2 text-[9px] uppercase tracking-widest rounded-xl bg-background/50">
             ENV: ARCTIC_PROD
@@ -56,12 +56,12 @@ export function Dashboard() {
       {/* Primary Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Total Yield', value: `${totalRevenue?.toLocaleString() ?? '0'}`, icon: DollarSign, meta: 'All-time platform yield', color: 'text-primary' },
-          { label: 'Monthly MRR', value: `${mrr?.toLocaleString() ?? '0'}`, icon: TrendingUp, meta: 'Active Arctic Plans', color: 'text-primary' },
-          { label: 'Fleet Registry', value: customerCount ?? '0', icon: UsersIcon, meta: 'Unique Service Entities', color: 'text-secondary' },
+          { label: 'Total Yield', value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, meta: 'All-time platform yield', color: 'text-primary' },
+          { label: 'Monthly MRR', value: `$${mrr.toLocaleString()}`, icon: TrendingUp, meta: 'Active Arctic Plans', color: 'text-primary' },
+          { label: 'Fleet Registry', value: customerCount.toString(), icon: UsersIcon, meta: 'Unique Service Entities', color: 'text-secondary' },
         ].map((stat, i) => (
           <Card key={i} className="border-2 border-border/50 glass-ice rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all group overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-125 transition-transform">
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-125 transition-transform pointer-events-none">
               <stat.icon className="h-24 w-24" />
             </div>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -69,7 +69,7 @@ export function Dashboard() {
               <stat.icon className={`h-4 w-4 ${stat.color} group-hover:animate-crackle`} />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-black tracking-tighter">{stat.value}</div>
+              <div className="text-4xl font-black tracking-tighter">{isLoading ? '---' : stat.value}</div>
               <p className="text-[9px] text-muted-foreground mt-4 font-black uppercase tracking-widest opacity-60">
                 {stat.meta}
               </p>
@@ -77,13 +77,13 @@ export function Dashboard() {
           </Card>
         ))}
         <Card className="bg-metallic text-white border-none shadow-[0_20px_50px_rgba(0,191,255,0.3)] rounded-[2.5rem] overflow-hidden group">
-          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] opacity-90">Arctic Rating</CardTitle>
             <Star className="h-4 w-4 text-white fill-white animate-crackle" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-black tracking-tighter">{satisfactionScore ?? '4.9'}/5.0</div>
+            <div className="text-4xl font-black tracking-tighter">{isLoading ? '---' : `${satisfactionScore}/5.0`}</div>
             <p className="text-[10px] text-white/80 mt-4 font-black uppercase tracking-widest">Global Satisfaction Index</p>
           </CardContent>
         </Card>
@@ -176,7 +176,7 @@ export function Dashboard() {
                Next fleet renewal cycle begins in <span className="text-primary">48 hours</span>. Verify all technician protocols are up to date.
              </p>
              <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
-               <div className="h-full w-3/4 bg-primary animate-shimmer" />
+               <div className={cn("h-full bg-primary", !isLoading && "animate-shimmer")} style={{ width: '75%' }} />
              </div>
           </Card>
         </div>
