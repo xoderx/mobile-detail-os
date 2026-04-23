@@ -163,6 +163,7 @@ export class ConfigEntity extends IndexedEntity<AppConfig> {
     integrations: { stripe: true, twilio: false, googleMaps: true, cloudinary: false },
     keys: { stripePublicKey: "pk_test_placeholder", twilioSid: "AC_placeholder" }
   };
+  static readonly seedData: AppConfig[] = [ConfigEntity.initialState];
 }
 export const initializeStore = async (env: Env) => {
   await Promise.all([
