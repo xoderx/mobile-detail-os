@@ -18,6 +18,11 @@ import { toast } from 'sonner';
 export default function Schedule() {
   const queryClient = useQueryClient();
   const [date, setDate] = useState<Date | undefined>(new Date());
+  // Fetch all users to filter technicians dynamically
+  const { data: usersData } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => api<{ items: any[] }>('/api/users'),
+  });
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
     queryKey: ['bookings'],
     queryFn: () => api<{ items: any[] }>('/api/bookings'),
@@ -40,11 +45,8 @@ export default function Schedule() {
   const dailyJobs = allBookings.filter(b =>
     date && b.dateTime && isSameDay(new Date(b.dateTime), date)
   );
-  const technicians = [
-    { id: 'tech-1', name: 'James Wilson' },
-    { id: 'tech-2', name: 'Sarah Miller' },
-    { id: 'tech-3', name: 'David Brown' },
-  ];
+  // Extract technicians from live user data
+  const technicians = (usersData?.items ?? []).filter(u => u.role === 'tech');
   const getTechLoad = (techId: string) => {
     return dailyJobs.filter(b => b.technicianId === techId).length;
   };
@@ -72,7 +74,7 @@ export default function Schedule() {
             <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Team Payload Index</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {technicians.map((tech) => {
+            {technicians.length > 0 ? technicians.map((tech) => {
               const load = getTechLoad(tech.id);
               const isBusy = load >= 3;
               return (
@@ -89,7 +91,9 @@ export default function Schedule() {
                   </div>
                 </div>
               );
-            })}
+            }) : (
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50 text-center">No Technicians Logged</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -102,7 +106,7 @@ export default function Schedule() {
             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Operational Dispatch Queue</p>
           </div>
           <div className="flex items-center gap-4">
-            {assignTech.isPending && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+            {(assignTech.isPending || bookingsLoading) && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
             <Badge className="bg-primary/10 text-primary border-2 border-primary/20 px-4 py-1.5 font-black uppercase text-[10px] tracking-widest h-8 flex items-center">
               {dailyJobs.length} ACTIVE ASSIGNMENTS
             </Badge>
@@ -143,7 +147,7 @@ export default function Schedule() {
                             <SelectValue placeholder="Establish Link" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="unassigned" disabled className="text-[10px] font-black uppercase">Assign to Team</SelectItem>
+                            <SelectItem value="unassigned" className="text-[10px] font-black uppercase">Unassigned</SelectItem>
                             {technicians.map(t => (
                               <SelectItem key={t.id} value={t.id} className="text-[10px] font-black uppercase">{t.name}</SelectItem>
                             ))}

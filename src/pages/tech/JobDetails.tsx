@@ -33,7 +33,8 @@ export default function JobDetails() {
     enabled: !!id,
   });
   useEffect(() => {
-    if (booking?.checklist && Object.keys(booking.checklist).length > 0) {
+    // Merge server-side checklist with defaults to ensure full protocol compliance
+    if (booking?.checklist) {
       setLocalChecklist(prev => ({ ...prev, ...booking.checklist }));
     }
   }, [booking]);
@@ -64,26 +65,38 @@ export default function JobDetails() {
     logout();
     navigate('/login');
   };
+  const allChecked = Object.keys(localChecklist).every(key => localChecklist[key] === true);
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950">
       <div className="text-center space-y-4">
         <Loader2 className="animate-spin h-10 w-10 text-primary mx-auto" />
-        <p className="text-[10px] font-black uppercase text-primary tracking-[0.4em]">Handshaking...</p>
+        <p className="text-[10px] font-black uppercase text-primary tracking-[0.4em]">Establishing Uplink...</p>
       </div>
     </div>
   );
   if (!booking) return (
     <div className="p-12 text-center space-y-6">
-      <p className="font-black uppercase text-sm tracking-[0.3em]">Access Denied: Node Null</p>
-      <Button onClick={() => navigate('/tech')} className="bg-primary h-14 px-8 rounded-2xl font-black uppercase text-xs">Return to Fleet Queue</Button>
+      <p className="font-black uppercase text-sm tracking-[0.3em]">Access Denied: Terminal Null</p>
+      <Button onClick={() => navigate('/tech')} className="bg-primary h-14 px-8 rounded-2xl font-black uppercase text-xs">Return to Fleet</Button>
     </div>
   );
   const toggleCheck = (item: string) => {
+    if (booking.status === 'completed') return;
     const next = { ...localChecklist, [item]: !localChecklist[item] };
     setLocalChecklist(next);
     updateChecklistMutation.mutate(next);
   };
-  const allChecked = Object.values(localChecklist).every(v => v);
+  const handleStatusTransition = () => {
+    if (booking.status === 'pending') {
+      updateStatus.mutate('confirmed');
+    } else if (booking.status === 'confirmed') {
+      if (!allChecked) {
+        toast.error("Protocol Incomplete: Verify all checklist items before sign-off.");
+        return;
+      }
+      updateStatus.mutate('completed');
+    }
+  };
   return (
     <div className="min-h-screen bg-slate-50/50">
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b-2 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm">
@@ -102,12 +115,12 @@ export default function JobDetails() {
       </header>
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-10 pb-24">
         <div className="flex items-center justify-between px-2">
-          <div>
-            <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">
-              {booking.contact?.firstName} {booking.contact?.lastName}
+          <div className="max-w-[70%]">
+            <h1 className="text-4xl font-black tracking-tighter uppercase leading-none truncate">
+              {booking.contact?.firstName || 'Guest'} {booking.contact?.lastName || 'Client'}
             </h1>
             <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em] mt-2 opacity-60">
-              Deployment Window: {format(new Date(booking.dateTime), 'h:mm a')}
+              Deployment: {format(new Date(booking.dateTime), 'h:mm a')}
             </p>
           </div>
           <Badge className={`uppercase font-black text-[9px] tracking-widest px-4 h-8 flex items-center shadow-lg ${booking.status === 'completed' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-primary shadow-primary/20'}`}>
@@ -118,18 +131,18 @@ export default function JobDetails() {
           <Card className="glass-ice border-2 border-primary/10 rounded-[1.5rem] shadow-sm">
             <CardContent className="p-6 flex items-center gap-4">
               <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center"><Car className="h-5 w-5 text-primary" /></div>
-              <div>
+              <div className="overflow-hidden">
                 <p className="text-[8px] uppercase font-black text-muted-foreground tracking-widest opacity-60">Chassis</p>
-                <p className="text-xs font-black uppercase tracking-tight">{booking.vehicleSize}</p>
+                <p className="text-xs font-black uppercase tracking-tight truncate">{booking.vehicleSize}</p>
               </div>
             </CardContent>
           </Card>
           <Card className="glass-ice border-2 border-primary/10 rounded-[1.5rem] shadow-sm">
             <CardContent className="p-6 flex items-center gap-4">
               <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center"><Package className="h-5 w-5 text-primary" /></div>
-              <div>
+              <div className="overflow-hidden">
                 <p className="text-[8px] uppercase font-black text-muted-foreground tracking-widest opacity-60">Protocol</p>
-                <p className="text-xs font-black uppercase tracking-tight">{booking.packageId}</p>
+                <p className="text-xs font-black uppercase tracking-tight truncate">{booking.packageId}</p>
               </div>
             </CardContent>
           </Card>
@@ -150,11 +163,12 @@ export default function JobDetails() {
                   className={`flex items-center space-x-6 p-6 transition-all cursor-pointer group ${localChecklist[item] ? 'bg-primary/5 opacity-50' : 'bg-white hover:bg-slate-50'}`}
                   onClick={() => toggleCheck(item)}
                 >
-                  <Checkbox 
-                    checked={localChecklist[item]} 
-                    onCheckedChange={() => toggleCheck(item)} 
-                    id={item} 
-                    className="h-6 w-6 border-2 border-primary/30 rounded-lg data-[state=checked]:bg-primary" 
+                  <Checkbox
+                    checked={localChecklist[item]}
+                    onCheckedChange={() => toggleCheck(item)}
+                    id={item}
+                    disabled={booking.status === 'completed'}
+                    className="h-6 w-6 border-2 border-primary/30 rounded-lg data-[state=checked]:bg-primary"
                   />
                   <label htmlFor={item} className={`flex-1 text-sm font-black uppercase tracking-widest cursor-pointer transition-all ${localChecklist[item] ? 'line-through text-muted-foreground' : 'text-slate-800'}`}>
                     {item}
@@ -166,7 +180,7 @@ export default function JobDetails() {
         </Card>
         <div className="grid grid-cols-2 gap-6">
           <Button size="lg" variant="outline" className="h-16 gap-3 font-black uppercase text-[10px] tracking-widest bg-white border-2 border-border/50 rounded-2xl hover:bg-primary/5 transition-all shadow-sm" asChild>
-            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Client Registry Site')}`} target="_blank" rel="noreferrer">
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booking.contact?.address || 'Client Site')}`} target="_blank" rel="noreferrer">
               <Navigation className="h-5 w-5 text-primary" /> Global Route
             </a>
           </Button>
@@ -177,30 +191,27 @@ export default function JobDetails() {
           </Button>
         </div>
         <div className="pt-6">
-          {booking.status === 'pending' && (
-            <Button 
-              className="w-full bg-primary hover:bg-primary/90 h-20 text-xl font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/20 rounded-3xl active:scale-[0.98] transition-transform border-t-2 border-white/20" 
-              onClick={() => updateStatus.mutate('confirmed')}
-              disabled={updateStatus.isPending}
-            >
-              {updateStatus.isPending ? <Loader2 className="h-8 w-8 animate-spin" /> : 'Establish Arrival'}
-            </Button>
-          )}
-          {booking.status === 'confirmed' && (
-            <Button 
-              className={`w-full h-20 text-xl font-black uppercase tracking-[0.3em] shadow-2xl rounded-3xl active:scale-[0.98] transition-all border-t-2 border-white/20 ${allChecked ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20' : 'bg-muted text-muted-foreground border-none opacity-50 cursor-not-allowed'}`} 
-              disabled={!allChecked || updateStatus.isPending} 
-              onClick={() => updateStatus.mutate('completed')}
-            >
-              {updateStatus.isPending ? <Loader2 className="animate-spin h-8 w-8" /> : allChecked ? 'Manifest Sign-off' : 'Complete Protocols'}
-            </Button>
-          )}
+          <Button
+            className={cn(
+              "w-full h-20 text-xl font-black uppercase tracking-[0.3em] shadow-2xl rounded-3xl active:scale-[0.98] transition-all border-t-2 border-white/20",
+              booking.status === 'completed' ? 'bg-slate-200 text-slate-500 border-none cursor-default shadow-none' : 
+              (booking.status === 'confirmed' && allChecked) ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20' : 
+              (booking.status === 'confirmed' && !allChecked) ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed' :
+              'bg-primary hover:bg-primary/90 shadow-primary/20'
+            )}
+            onClick={handleStatusTransition}
+            disabled={updateStatus.isPending || (booking.status === 'confirmed' && !allChecked) || booking.status === 'completed'}
+          >
+            {updateStatus.isPending ? <Loader2 className="h-8 w-8 animate-spin" /> : 
+             booking.status === 'pending' ? 'Establish Arrival' : 
+             booking.status === 'confirmed' ? (allChecked ? 'Manifest Sign-off' : 'Complete Protocols') : 'Job Finalized'}
+          </Button>
           <div className="mt-10 flex gap-4 items-start bg-amber-500/10 p-6 rounded-[2rem] border-2 border-amber-500/20 animate-crackle">
             <AlertCircle className="h-6 w-6 shrink-0 text-amber-600 mt-0.5" />
             <div className="space-y-1">
                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-amber-600">Arctic Safety Protocol</p>
                <p className="text-[11px] text-amber-800 leading-relaxed font-bold uppercase tracking-tight">
-                Ensure vehicle surface temperature is below 80°F before applying ceramic shield. Verify paint depth in high-friction zones.
+                Ensure vehicle surface temperature is stabilized. Double check wheel decontamination zones before frozen finish application.
               </p>
             </div>
           </div>
