@@ -1,6 +1,6 @@
 # Cloudflare Workers React Template
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/xoderx/mobile-detail-os)
 
 A production-ready full-stack application template powered by Cloudflare Workers. Features a modern React frontend with shadcn/ui components, Tailwind CSS, TypeScript, and a robust Workers backend using Hono, Durable Objects for scalable entity storage (Users, Chats, Messages), and TanStack Query for optimistic data synchronization.
 
@@ -92,7 +92,7 @@ const message = await api<ChatMessage>('/api/chats/${chatId}/messages', {
 3. **Custom Domain** (optional):
    Update `wrangler.jsonc` and run `wrangler deploy`.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/xoderx/mobile-detail-os)
 
 **Pro Tip**: Use Cloudflare Pages for frontend-only hosting, or full Workers Sites for SPA + API.
 
