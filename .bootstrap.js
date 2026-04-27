@@ -75,18 +75,9 @@ function updateWranglerJsonc() {
         console.warn('⚠️  Failed to update wrangler.jsonc:', error.message);
     }
 }
-
 function runSetupCommands() {
-    const commands = [
-    "bun add stripe@^17.2.0",
-    "bun add @stripe/stripe-js@^4.3.0",
-    "bun add @stripe/react-stripe-js@^2.7.3",
-    "bun add @stripe/stripe-js @stripe/react-stripe-js stripe",
-    "bun add zustand",
-    "bun add lucide-react framer-motion",
-    "bun add sonner",
-    "bun add react-textarea-autosize"
-];
+  console.log('⊘ Skipping runtime dependency mutation');
+};
     
     if (commands.length === 0) {
         console.log('⊘ No setup commands to run');
