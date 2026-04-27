@@ -116,7 +116,27 @@ export default ({ mode }: { mode: string }) => {
       },
     },
     customLogger: env.VITE_LOGGER_TYPE === 'json' ? customLogger : undefined,
-    // Enable source maps in development too
+    // scripts/strip-worker-sourcemap.mjs
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { globSync } from "glob";
+
+const files = globSync("dist/**/index.js");
+
+for (const file of files) {
+  if (!existsSync(file)) continue;
+
+  const original = readFileSync(file, "utf8");
+  const patched = original.replace(
+    /\n?\/\/# sourceMappingURL=data:application\/json[^"\n\r]*/g,
+    ""
+  );
+
+  if (patched !== original) {
+    writeFileSync(file, patched);
+    console.log(`Stripped inline sourcemap from ${file}`);
+  }
+}
+  // Enable source maps in development too
     css: {
       devSourcemap: true,
     },
