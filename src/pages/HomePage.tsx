@@ -42,7 +42,7 @@ export function HomePage() {
     }
   };
   const heroTitle = config?.heroTitle || 'FROZEN PERFECTION.';
-  const titleParts = heroTitle.split(' ');
+  const titleParts = heroTitle ? heroTitle.split(' ') : [];
   const firstWord = titleParts[0] || '';
   const restOfTitle = titleParts.slice(1).join(' ');
   return (
@@ -111,7 +111,7 @@ export function HomePage() {
                 <Button asChild size="lg" className="h-16 px-10 text-lg font-black uppercase tracking-widest bg-metallic rounded-2xl shadow-xl shadow-primary/20 border-t border-white/20">
                   <Link to="/booking">{config?.ctaText || 'Start Booking'}</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-16 px-10 text-lg font-black uppercase tracking-widest border-2 rounded-2xl border-primary/20 text-primary-foreground shadow-lg hover:bg-primary/10">
+                <Button asChild variant="outline" size="lg" className="h-16 px-10 text-lg font-black uppercase tracking-widest border-2 rounded-2xl border-primary/20 shadow-lg hover:bg-primary/10">
                   <Link to="/pricing">View Plans</Link>
                 </Button>
               </div>
